@@ -22,6 +22,10 @@ new class extends Component
 
         <livewire:home.latest-products />
 
+        <livewire:home.our-office />
+
+        <livewire:home.about-us />
+
         <livewire:home.why-choose-us />
 
     </div>

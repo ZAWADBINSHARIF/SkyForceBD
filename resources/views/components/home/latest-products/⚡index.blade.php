@@ -65,11 +65,15 @@ new class extends Component
                             x-text="p.badge"></span>
                     </div>
 
-                    <div class="mt-auto pt-1">
+                    <div class="flex gap-1.5 mt-auto">
                         <button
-                            class="w-full py-1.5 text-xs font-semibold text-white bg-primary-500 hover:bg-primary-500 hover:text-white rounded-lg transition-colors duration-200">
-                            Request Product
+                            class="flex-1 py-1.5 text-xs font-semibold text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors duration-200">
+                            Request
                         </button>
+                        <a href="/product"
+                            class="flex-1 py-1.5 text-xs font-semibold text-center text-primary-500 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors duration-200">
+                            Details
+                        </a>
                     </div>
                 </div>
             </div>
