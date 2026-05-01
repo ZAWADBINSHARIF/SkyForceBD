@@ -4,7 +4,10 @@ use Livewire\Component;
 
 new class extends Component
 {
-    //
+    public function goTo(string $name)
+    {
+        return redirect()->route($name);
+    }
 };
 ?>
 
@@ -15,11 +18,12 @@ new class extends Component
                 <img width="80" src="{{asset('images/skyforce-logo.png')}}" />
             </a>
         </div>
-
         <div class="hidden md:flex items-center gap-1">
-            <a href="/products"
+            <a href="/"
+                class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">Home</a>
+            <a <a href="/products"
                 class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">Products</a>
-            <a
+            <a href="/orders"
                 class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors flex items-center gap-1">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -41,18 +45,20 @@ new class extends Component
         <div class="flex items-center gap-2">
 
             <div>
-                <button class="btn-primary">Order
+                <button wire:click='goTo("order-request")' class="btn-primary">Order
                     Request</button>
             </div>
 
             <div class="hidden md:flex items-center gap-2">
-                <button class="btn">Sign
+                <button wire:click="$dispatch('open-auth-modal', { mode: 'signin' })" class="btn">Sign
                     in</button>
-                <button class="btn">Sign
+                <button wire:click="$dispatch('open-auth-modal', { mode: 'signup' })" class="btn">Sign
                     up</button>
             </div>
             <div
-                class="w-10 h-10 rounded-full bg-[#EEEDFE] flex items-center justify-center text-xs font-medium text-[#3C3489] cursor-pointer">
+                class="w-10 h-10 rounded-full bg-[#EEEDFE] flex items-center justify-center text-xs font-medium text-[#3C3489] cursor-pointer"
+                wire:click="$dispatch('open-profile-modal')"
+                >
                 JD</div>
         </div>
     </div>

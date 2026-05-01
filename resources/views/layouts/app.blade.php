@@ -16,6 +16,10 @@
 
     <livewire:navbar />
 
+    <livewire:auth.auth-modal />
+
+    <livewire:profile.modal/>
+
     <main class=" container mx-auto px-4 md:px-6">
 
     {{ $slot }}
@@ -25,6 +29,8 @@
     <livewire:footer />
 
     <livewire:tab-button-nav />
+
+    <livewire:fab-button />
 
     @livewireScripts
 </body>
