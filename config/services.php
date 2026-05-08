@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'bulksmsbd' => [
+        'endpoint' => env('BULKSMSBD_ENDPOINT', 'http://bulksmsbd.net/api/smsapi'),
+        'api_key' => env('BULKSMSBD_API_KEY'),
+        'sender_id' => env('BULKSMSBD_SENDER_ID'),
+    ],
+
 ];

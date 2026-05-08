@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Filament\Resources\Products\Tables;
+
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
+
+class ProductsTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                ImageColumn::make('product_images')
+                    ->label('Cover')
+                    ->disk('public')
+                    ->getStateUsing(fn($record) => collect($record->product_images)->first())
+                    ->square()
+                    ->defaultImageUrl('https://placehold.co/80x80?text=No+Image'),
+
+                TextColumn::make('product_name')
+                    ->label('Product')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('semibold')
+                    ->description(fn($record) => $record->slug),
+
+                TextColumn::make('category.name')
+                    ->label('Category')
+                    ->badge()
+                    ->color('info')
+                    ->sortable(),
+
+                TextColumn::make('product_images')
+                    ->label('Images')
+                    ->getStateUsing(fn($record) => count($record->product_images ?? []))
+                    ->badge()
+                    ->color('gray')
+                    ->suffix(' photos'),
+
+                IconColumn::make('published')
+                    ->label('Published')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
+
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->toggleable(),
+            ])
+            ->filters([
+                SelectFilter::make('category_id')
+                    ->label('Category')
+                    ->relationship('category', 'name'),
+
+                TernaryFilter::make('published')
+                    ->label('Published Status')
+                    ->trueLabel('Published')
+                    ->falseLabel('Draft'),
+            ])
+            ->recordActions([
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}
