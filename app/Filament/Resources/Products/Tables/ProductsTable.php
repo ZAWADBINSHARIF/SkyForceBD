@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Products\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -21,7 +22,7 @@ class ProductsTable
                 ImageColumn::make('product_images')
                     ->label('Cover')
                     ->disk('public')
-                    ->getStateUsing(fn($record) => collect($record->product_images)->first())
+                    ->getStateUsing(fn($record) => $record->product_images[0])
                     ->square()
                     ->defaultImageUrl('https://placehold.co/80x80?text=No+Image'),
 
@@ -38,12 +39,10 @@ class ProductsTable
                     ->color('info')
                     ->sortable(),
 
-                TextColumn::make('product_images')
-                    ->label('Images')
-                    ->getStateUsing(fn($record) => count($record->product_images ?? []))
+                TextColumn::make('price')
                     ->badge()
-                    ->color('gray')
-                    ->suffix(' photos'),
+                    ->icon(Heroicon::OutlinedCurrencyBangladeshi)
+                    ->sortable(),
 
                 IconColumn::make('published')
                     ->label('Published')

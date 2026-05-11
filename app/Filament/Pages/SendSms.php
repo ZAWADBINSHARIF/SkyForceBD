@@ -34,19 +34,26 @@ class SendSms extends Page
 
     public ?array $data = [];
 
-    // ── Computed from form state ──────────────────────────────────
-    public int   $charCount     = 0;
-    public int   $smsParts      = 0;
-    public int   $recipientCount = 0;
-    public float $estimatedCost = 0.0;
+    // ── Computed ──────────────────────────────────────────────
+    public int    $charCount      = 0;
+    public int    $smsParts       = 0;
+    public int    $recipientCount = 0;
+    public float  $estimatedCost  = 0.0;
+    public string $encoding       = 'GSM_7BIT_EX';
 
-    const CHARS_PER_PART = 160;
-    const COST_PER_PART  = 0.35;
+    const GSM_SINGLE_LIMIT   = 160;
+    const GSM_MULTI_LIMIT    = 153;
+
+    const UTF16_SINGLE_LIMIT = 70;
+    const UTF16_MULTI_LIMIT  = 67;
+
+    const COST_PER_PART      = 0.35;
 
     public function mount(): void
     {
         $this->form->fill([
             'phone_numbers' => [],
+            'custom_numbers' => [],
             'message'       => '',
         ]);
     }
@@ -57,7 +64,7 @@ class SendSms extends Page
             ->components([
                 Form::make([
 
-                    // ── Stats row ─────────────────────────────────
+                    // ── Stats ─────────────────────────────────
                     Section::make('')
                         ->schema([
                             Placeholder::make('stats')
@@ -66,7 +73,7 @@ class SendSms extends Page
                         ])
                         ->compact(),
 
-                    // ── Recipients ────────────────────────────────
+                    // ── Recipients ────────────────────────────
                     Section::make('Recipients')
                         ->description('Select from customers or type numbers manually.')
                         ->icon(Heroicon::OutlinedUsers)
@@ -77,6 +84,7 @@ class SendSms extends Page
                                 ->multiple()
                                 ->searchable()
                                 ->live()
+
                                 ->afterStateUpdated(function (
                                     array $state,
                                     callable $set,
@@ -99,7 +107,6 @@ class SendSms extends Page
 
                                     $normalizedSearch = $search;
 
-                                    // normalize only numeric searches
                                     if (preg_match('/^[\d\+\s]+$/', $search)) {
 
                                         $normalizedSearch = head(
@@ -179,31 +186,39 @@ class SendSms extends Page
 
                         ]),
 
-                    // ── Message ───────────────────────────────────
+                    // ── Message ───────────────────────────────
                     Section::make('Message')
-                        ->description('Each SMS part = 160 characters.')
+                        ->description('SMS encoding auto detection enabled.')
                         ->icon(Heroicon::OutlinedChatBubbleLeftEllipsis)
                         ->schema([
+
                             Textarea::make('message')
                                 ->label('Message Text')
                                 ->required()
                                 ->rows(5)
                                 ->maxLength(FieldLength::ExtraLong->value)
                                 ->live(debounce: 300)
+
                                 ->afterStateUpdated(function ($state) {
-                                    $this->charCount = strlen($state ?? '');
-                                    $this->smsParts  = $this->charCount > 0
-                                        ? (int) ceil($this->charCount / self::CHARS_PER_PART)
-                                        : 0;
+
+                                    $sms = $this->calculateSmsParts($state ?? '');
+
+                                    $this->charCount = $sms['length'];
+                                    $this->smsParts  = $sms['parts'];
+                                    $this->encoding  = $sms['encoding'];
+
                                     $this->recalculate();
                                 })
+
                                 ->hint(fn() => $this->renderCharHint())
                                 ->hintIcon(Heroicon::OutlinedCalculator)
                                 ->columnSpanFull(),
+
                         ]),
 
                 ])
                     ->livewireSubmitHandler('send')
+
                     ->footer([
                         Actions::make([
                             Action::make('send')
@@ -217,28 +232,104 @@ class SendSms extends Page
             ->statePath('data');
     }
 
-    // ── Helpers ───────────────────────────────────────────────────
+    // ──────────────────────────────────────────────────────────
+    // SMS Encoding Detection
+    // ──────────────────────────────────────────────────────────
+
+    private function isGsm7(string $text): bool
+    {
+        $gsm7 = '@£$¥èéùìòÇ
+Øø
+ÅåΔ_ΦΓΛΩΠΨΣΘΞ\\ÆæßÉ !"#¤%&\'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà';
+
+        $gsm7Extended = '^{}\\[~]|€';
+
+        $all = $gsm7 . $gsm7Extended;
+
+        for ($i = 0; $i < mb_strlen($text); $i++) {
+
+            $char = mb_substr($text, $i, 1);
+
+            if (! str_contains($all, $char)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function calculateSmsParts(string $message): array
+    {
+        $isGsm = $this->isGsm7($message);
+
+        if ($isGsm) {
+
+            $singleLimit = self::GSM_SINGLE_LIMIT;
+            $multiLimit  = self::GSM_MULTI_LIMIT;
+            $encoding    = 'GSM_7BIT_EX';
+        } else {
+
+            $singleLimit = self::UTF16_SINGLE_LIMIT;
+            $multiLimit  = self::UTF16_MULTI_LIMIT;
+            $encoding    = 'UTF16';
+        }
+
+        $length = mb_strlen($message);
+
+        $parts = match (true) {
+            $length === 0 => 0,
+            $length <= $singleLimit => 1,
+            default => (int) ceil($length / $multiLimit),
+        };
+
+        return [
+            'encoding' => $encoding,
+            'length'   => $length,
+            'parts'    => $parts,
+            'limit'    => $parts > 1 ? $multiLimit : $singleLimit,
+        ];
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Helpers
+    // ──────────────────────────────────────────────────────────
 
     private function recalculate(): void
     {
         $this->estimatedCost = round(
-            $this->recipientCount * $this->smsParts * self::COST_PER_PART,
+            $this->recipientCount
+                * $this->smsParts
+                * self::COST_PER_PART,
             2
         );
     }
 
     private function renderCharHint(): string
     {
-        $partChar   = $this->charCount % self::CHARS_PER_PART ?: ($this->charCount ? self::CHARS_PER_PART : 0);
-        $remaining  = self::CHARS_PER_PART - $partChar;
-        $parts      = $this->smsParts;
-        $totalCharacters = $this->charCount;
+        $message = $this->data['message'] ?? '';
 
-        if ($this->charCount === 0) {
-            return '0 / 160';
+        $sms = $this->calculateSmsParts($message);
+
+        $limit = $sms['limit'];
+
+        $partChar = $this->charCount % $limit;
+
+        if ($partChar === 0 && $this->charCount > 0) {
+            $partChar = $limit;
         }
 
-        return "{$partChar} / 160 chars · {$parts} part(s) · {$remaining} left in this part . Total characters {$totalCharacters}";
+        $remaining = $limit - $partChar;
+
+        if ($this->charCount === 0) {
+            return "0 / {$limit} chars";
+        }
+
+        return
+            "{$partChar} / {$limit} chars · " .
+            "{$this->smsParts} part(s) · " .
+            "{$remaining} left · " .
+            "Encoding: {$this->encoding} · " .
+            "Total: {$this->charCount}";
     }
 
     private function renderStats(): string
@@ -247,93 +338,130 @@ class SendSms extends Page
 
         return <<<HTML
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
+
             <div style="flex:1;min-width:140px;background:var(--fi-color-gray-50);border-radius:8px;padding:12px 16px;">
-                <p style="margin:0 0 4px;font-size:12px;color:var(--fi-color-gray-500);">Recipients</p>
-                <p style="margin:0;font-size:22px;font-weight:600;color:var(--fi-color-gray-900);">{$this->recipientCount}</p>
-                <p style="margin:2px 0 0;font-size:11px;color:var(--fi-color-gray-400);">numbers selected</p>
+                <p style="margin:0 0 4px;font-size:12px;color:var(--fi-color-gray-500);">
+                    Recipients
+                </p>
+
+                <p style="margin:0;font-size:22px;font-weight:600;color:var(--fi-color-gray-900);">
+                    {$this->recipientCount}
+                </p>
+
+                <p style="margin:2px 0 0;font-size:11px;color:var(--fi-color-gray-400);">
+                    numbers selected
+                </p>
             </div>
+
             <div style="flex:1;min-width:140px;background:var(--fi-color-gray-50);border-radius:8px;padding:12px 16px;">
-                <p style="margin:0 0 4px;font-size:12px;color:var(--fi-color-gray-500);">SMS Parts</p>
-                <p style="margin:0;font-size:22px;font-weight:600;color:var(--fi-color-gray-900);">{$this->smsParts}</p>
-                <p style="margin:2px 0 0;font-size:11px;color:var(--fi-color-gray-400);">per recipient</p>
+                <p style="margin:0 0 4px;font-size:12px;color:var(--fi-color-gray-500);">
+                    SMS Parts
+                </p>
+
+                <p style="margin:0;font-size:22px;font-weight:600;color:var(--fi-color-gray-900);">
+                    {$this->smsParts}
+                </p>
+
+                <p style="margin:2px 0 0;font-size:11px;color:var(--fi-color-gray-400);">
+                    {$this->encoding}
+                </p>
             </div>
+
             <div style="flex:1;min-width:140px;background:var(--fi-color-gray-50);border-radius:8px;padding:12px 16px;">
-                <p style="margin:0 0 4px;font-size:12px;color:var(--fi-color-gray-500);">Estimated Cost</p>
-                <p style="margin:0;font-size:22px;font-weight:600;color:var(--fi-color-gray-900);">৳{$cost}</p>
-                <p style="margin:2px 0 0;font-size:11px;color:var(--fi-color-gray-400);">৳0.35 × parts × recipients</p>
+                <p style="margin:0 0 4px;font-size:12px;color:var(--fi-color-gray-500);">
+                    Estimated Cost
+                </p>
+
+                <p style="margin:0;font-size:22px;font-weight:600;color:var(--fi-color-gray-900);">
+                    ৳{$cost}
+                </p>
+
+                <p style="margin:2px 0 0;font-size:11px;color:var(--fi-color-gray-400);">
+                    ৳0.35 × parts × recipients
+                </p>
             </div>
+
         </div>
         HTML;
     }
 
-    // ── Submit ────────────────────────────────────────────────────
+    // ──────────────────────────────────────────────────────────
+    // Submit
+    // ──────────────────────────────────────────────────────────
 
     public function send(): void
     {
         $data = $this->form->getState();
 
-        $numbers =  array_unique([
+        $numbers = array_unique([
             ...($this->data['phone_numbers'] ?? []),
             ...($this->data['custom_numbers'] ?? []),
         ]);
 
-        $message = $data['message'] ?? '';
+        $message = trim($data['message'] ?? '');
 
         if (empty($numbers)) {
+
             Notification::make()
                 ->warning()
                 ->title('No recipients')
                 ->body('Add at least one phone number.')
                 ->send();
+
             return;
         }
 
-        if (empty(trim($message))) {
+        if (empty($message)) {
+
             Notification::make()
                 ->warning()
                 ->title('Empty message')
                 ->body('Write a message before sending.')
                 ->send();
+
             return;
         }
 
-        // ── Your SMS sending logic goes here ──────────────────────
-        $sms      = app(BulkSMSBDService::class);
+        $sms = app(BulkSMSBDService::class);
+
         $response = $sms->send($numbers, $message);
 
         if ($response->successful()) {
+
             Notification::make()
                 ->success()
                 ->title('SMS queued successfully')
+
                 ->body(
                     count($numbers) . ' recipient(s) · ' .
                         $this->smsParts . ' part(s) · ' .
-                        '৳' . number_format($this->estimatedCost, 2) .
-                        ' · Message ID: ' . $response->messageId
+                        $this->encoding . ' · ' .
+                        '৳' . number_format($this->estimatedCost, 2) . ' · ' .
+                        'Message ID: ' . $response->messageId
                 )
-                ->send();
 
-            $this->form->fill(['phone_numbers' => [], 'message' => '']);
-            $this->charCount = $this->smsParts = $this->recipientCount = 0;
-            $this->estimatedCost = 0.0;
+                ->send();
         } else {
+
             Notification::make()
                 ->danger()
                 ->title('SMS failed')
                 ->body($response->errorLabel())
                 ->send();
         }
-        // ─────────────────────────────────────────────────────────
 
+        // Reset
 
         $this->form->fill([
             'phone_numbers' => [],
-            'message'       => '',
+            'custom_numbers' => [],
+            'message' => '',
         ]);
 
         $this->charCount      = 0;
         $this->smsParts       = 0;
         $this->recipientCount = 0;
         $this->estimatedCost  = 0.0;
+        $this->encoding       = 'GSM_7BIT_EX';
     }
 }

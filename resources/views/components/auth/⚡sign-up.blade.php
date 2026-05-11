@@ -127,7 +127,7 @@ new class extends Component
 };
 ?>
 
-<div class="px-6 py-6">
+<div class="px-6 py-6 rounded-2xl">
 
     @if ($step === 1)
 

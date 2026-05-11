@@ -1,88 +1,33 @@
 <?php
 
+use App\Models\Product;
 use Livewire\Component;
 
 new class extends Component
 {
 
-    public $product, $relatedProducts;
+    public Product $product;
+    public array $relatedProducts;
 
-    public function mount(): void
+    public function mount(string $slug): void
     {
         // Dummy product
-        $this->product = (object)[
-            'name'        => 'Premium Wireless Noise-Cancelling Headphones',
-            'price'       => 8500,
-            'old_price'   => 12000,
-            'description' => '
-                <p>Experience next-level sound with our <strong>Premium Wireless Headphones</strong>. Designed for audiophiles and everyday listeners alike, these headphones deliver crystal-clear audio with deep bass and crisp highs.</p>
-                <br>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li>Active Noise Cancellation (ANC) technology</li>
-                    <li>Up to 30 hours battery life</li>
-                    <li>Bluetooth 5.2 with 10m range</li>
-                    <li>Foldable, lightweight design — only 250g</li>
-                    <li>Built-in microphone for hands-free calls</li>
-                    <li>Compatible with iOS, Android & PC</li>
-                </ul>
-                <br>
-                <p>Available in Black, White, and Midnight Blue. Comes with a premium carry case and USB-C charging cable.</p>
-            ',
-            'category' => (object)[
-                'name' => 'Electronics',
-                'slug' => 'electronics',
-            ],
-            'images' => collect([
-                (object)['url' => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80'],
-                (object)['url' => 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&q=80'],
-                (object)['url' => 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&q=80'],
-                (object)['url' => 'https://images.unsplash.com/photo-1577174881658-0f30ed549adc?w=600&q=80'],
-            ]),
-        ];
+        $this->product = Product::with('category')->where('slug', $slug)->first();
 
         // Dummy related products
-        $this->relatedProducts = collect([
-            (object)[
-                'name'      => 'Wireless Earbuds Pro',
-                'price'     => 4500,
-                'old_price' => 6000,
-                'slug'      => 'wireless-earbuds-pro',
-                'images'    => collect([(object)['url' => 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300&q=70']]),
-            ],
-            (object)[
-                'name'      => 'Smart Watch Series 5',
-                'price'     => 14200,
-                'old_price' => 18000,
-                'slug'      => 'smart-watch-series-5',
-                'images'    => collect([(object)['url' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&q=70']]),
-            ],
-            (object)[
-                'name'      => 'Bluetooth Speaker',
-                'price'     => 6600,
-                'old_price' => 8500,
-                'slug'      => 'bluetooth-speaker',
-                'images'    => collect([(object)['url' => 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300&q=70']]),
-            ],
-            (object)[
-                'name'      => 'Mechanical Keyboard',
-                'price'     => 12100,
-                'old_price' => 15000,
-                'slug'      => 'mechanical-keyboard',
-                'images'    => collect([(object)['url' => 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300&q=70']]),
-            ],
-            (object)[
-                'name'      => 'Wireless Charger Pad',
-                'price'     => 4400,
-                'old_price' => 5800,
-                'slug'      => 'wireless-charger-pad',
-                'images'    => collect([(object)['url' => 'https://images.unsplash.com/photo-1618053448492-2b629c2c912f?w=300&q=70']]),
-            ],
-        ]);
+        $this->relatedProducts = Product::query()
+            ->whereRelation('category', 'slug', $this->product->category?->slug)
+            ->whereKeyNot($this->product->id)
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->toArray();
     }
 
-    public function orderRequest(string $productURL){
-        return route("order-request", [
-            'product_link' => $productURL
+    public function orderRequest(string $productURL)
+    {
+        $this->redirectRoute('order-request', [
+            'product_link' => $productURL,
         ]);
     }
 };
@@ -108,19 +53,19 @@ new class extends Component
 
                 {{-- Main Image --}}
                 <div class="aspect-square w-full rounded-2xl overflow-hidden border border-gray-100 bg-white">
-                    <template x-for="(img, i) in {{ json_encode($product->images->pluck('url')) }}" :key="i">
-                        <img :src="img" :alt="'Product image ' + (i + 1)"
+                    <template x-for="(img, i) in {{ json_encode($product->product_images) }}" :key="i">
+                        <img :src="`/storage/${img}`" :alt="'Product image ' + (i + 1)"
                             class="w-full h-full object-cover transition-opacity duration-200" x-show="active === i">
                     </template>
                 </div>
 
                 {{-- Thumbnails --}}
                 <div class="flex gap-2 flex-wrap">
-                    @foreach($product->images as $i => $image)
+                    @foreach($product->product_images as $i => $image)
                     <button @click="active = {{ $i }}"
                         :class="active === {{ $i }} ? 'border-primary-500 ring-2 ring-primary-200' : 'border-gray-200 hover:border-gray-300'"
                         class="w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-150 shrink-0">
-                        <img src="{{ $image->url }}" alt="Thumb {{ $i + 1 }}" class="w-full h-full object-cover">
+                        <img src="/storage/{{ $image }}" alt="Thumb {{ $i + 1 }}" class="w-full h-full object-cover">
                     </button>
                     @endforeach
                 </div>
@@ -176,7 +121,7 @@ new class extends Component
                 <div class="border-t border-gray-100"></div>
 
                 {{-- Request Button --}}
-                <button wire:click='orderRequest(url()->full())'
+                <button wire:click='orderRequest("{{url()->full()}}")'
                     class="w-full bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-bold text-sm py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-150">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -205,12 +150,12 @@ new class extends Component
                 Product Description
             </h2>
             <div class="prose prose-sm prose-gray max-w-none text-gray-600 leading-relaxed">
-                {!! $product->description !!}
+                {!! $product->product_description !!}
             </div>
         </div>
 
         {{-- Related Products --}}
-        @if($relatedProducts->count())
+        @if($relatedProducts)
         <div>
             <div class="flex items-baseline justify-between mb-5">
                 <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
@@ -228,7 +173,7 @@ new class extends Component
                     class="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-200 hover:shadow-md transition-all duration-200 group">
 
                     <div class="aspect-square w-full overflow-hidden bg-gray-50">
-                        <img src="{{ $related->images->first()?->url }}" alt="{{ $related->name }}" loading="lazy"
+                        <img src="{{ $related->images->first() }}" alt="{{ $related->name }}" loading="lazy"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                     </div>
 

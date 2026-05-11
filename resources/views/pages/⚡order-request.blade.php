@@ -1,5 +1,6 @@
 <?php
 
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 new class extends Component
@@ -7,9 +8,12 @@ new class extends Component
     public int $step = 1;
     public int $totalSteps = 3;
 
+    #[Url]
+    public ?string $product_link = null;
+
     // Step 1
     public array $products = [
-        ['link' => '', 'quantity' => 1],
+        //
     ];
     public string $customerName = '';
     public string $phoneNumber = '';
@@ -20,16 +24,17 @@ new class extends Component
 
     public string $youtubeUrl = 'https://www.youtube.com/watch?v=txVwnBV4DEY';
 
-    public function mount(?string $product_link = null)
+    public function mount()
     {
+        $product_link = $this->product_link ? $this->product_link : null;
+
         if ($product_link != null) {
-            array_push(
-                $this->products,
-                [
-                    'link' => $product_link,
-                    'quantity' => 1
-                ]
-            );
+            $this->products[] = [
+                'link' => $product_link,
+                'quantity' => 1,
+            ];
+        } else {
+            $this->products[] = ['link' => '', 'quantity' => 1];
         }
     }
 

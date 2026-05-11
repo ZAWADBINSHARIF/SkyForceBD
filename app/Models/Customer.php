@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 
-class Customer extends Model
+
+
+class Customer extends Authenticatable implements AuthenticatableContract
 {
     protected $fillable = [
         'full_name',
@@ -13,6 +16,7 @@ class Customer extends Model
         'address',
         'password_hash',
         'avatar_url',
+        'email'
     ];
 
     protected $hidden = ['password_hash'];
@@ -21,6 +25,14 @@ class Customer extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    protected $rememberTokenName = false;
+
+    // Tell Laravel to use password_hash column instead of password
+    // public function getAuthPassword(): string
+    // {
+    //     return $this->password_hash;
+    // }
 
     public function authProviders(): HasMany
     {

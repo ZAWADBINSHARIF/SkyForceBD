@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html class="light" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8">
@@ -17,6 +17,8 @@
     <livewire:navbar />
 
     <livewire:auth.auth-modal />
+
+    <livewire:commons.modals.confirmation-modal />
 
     <livewire:profile.modal/>
 

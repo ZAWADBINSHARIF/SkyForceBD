@@ -88,6 +88,15 @@ class ProductForm
                             ->offColor('danger'),
                     ]),
 
+                Section::make('Priceing')
+                    ->schema([
+                        TextInput::make('price')
+                            ->required(),
+                        TextInput::make('old_price')
+                            ->nullable(),
+                    ])->columns(3)
+                    ->columnSpanFull(),
+
                 // ── Full-width images ─────────────────────────────────
                 Section::make('Product Images')
                     ->description('Upload up to 10 images. Each must be under 4 MB. The first image is the cover.')
@@ -108,6 +117,7 @@ class ProductForm
                             ->helperText('Drag to reorder. First image = cover photo.')
                             ->columnSpanFull(),
                     ]),
+
             ])->columns(3);
     }
 }

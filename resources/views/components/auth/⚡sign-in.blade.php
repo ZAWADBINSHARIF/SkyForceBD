@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AuthProviderName;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -43,12 +44,14 @@ new class extends Component
 
     public function redirectOauth(string $provider): void
     {
+        abort_unless(in_array($provider, AuthProviderName::values()), 403);
+
         $this->redirect(route('oauth.redirect', $provider));
     }
 };
 ?>
 
-<div class="px-6 py-6 space-y-5">
+<div class="px-6 py-6 space-y-5 rounded-2xl">
 
     {{-- OAuth buttons --}}
     <div class="space-y-2.5">

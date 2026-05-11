@@ -16,6 +16,7 @@ new class extends Component
     public string $full_name = '';
     public string $address = '';
     public string $phone_number = '';
+    public string $email = '';
 
     // Password fields
     public string $current_password = '';
@@ -28,10 +29,11 @@ new class extends Component
 
     public function mount(): void
     {
-        $user = Auth::user();
+        $user = Auth::guard('customer')->user();
         $this->full_name     = $user->full_name     ?? $user->name ?? '';
         $this->address       = $user->address       ?? '';
         $this->phone_number  = $user->phone_number  ?? '';
+        $this->email         = $user->email  ?? '';
     }
 
     #[On('open-profile-modal')]
@@ -65,7 +67,7 @@ new class extends Component
             'phone_number.regex'    => 'Enter a valid phone number.',
         ]);
 
-        $user = Auth::user();
+        $user = Auth::guard('customer')->user();
         $user->update([
             'full_name'    => $this->full_name,
             'address'      => $this->address,
@@ -85,12 +87,12 @@ new class extends Component
             'new_password.confirmed' => 'Passwords do not match.',
         ]);
 
-        if (! Hash::check($this->current_password, Auth::user()->password)) {
+        if (! Hash::check($this->current_password, Auth::guard('customer')->user()->password)) {
             $this->addError('current_password', 'Current password is incorrect.');
             return;
         }
 
-        Auth::user()->update([
+        Auth::guard('customer')->user()->update([
             'password' => Hash::make($this->new_password),
         ]);
 
@@ -124,11 +126,11 @@ new class extends Component
                 <div class="flex items-center gap-3">
                     <div
                         class="w-9 h-9 rounded-full bg-primary-500 flex items-center justify-center text-white text-sm font-bold select-none">
-                        {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
+                        {{ strtoupper(substr(Auth::guard('customer')->user()->name ?? 'U', 0, 1)) }}
                     </div>
                     <div>
                         <p class="text-sm font-semibold text-slate-800 leading-tight">Account Settings</p>
-                        <p class="text-xs text-slate-400">{{ Auth::user()->email ?? '' }}</p>
+                        <p class="text-xs text-slate-400">{{ Auth::guard('customer')->user()->email ?? '' }}</p>
                     </div>
                 </div>
                 <button wire:click="$dispatch('close-profile-modal')"

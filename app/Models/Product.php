@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\PriceCast;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,10 @@ class Product extends Model
         'product_name',
         'product_images',
         'product_description',
+        'price',
+        'old_price',
+        'discount',
+        'badge',
         'slug',
         'published',
     ];
@@ -20,6 +25,8 @@ class Product extends Model
     protected $casts = [
         'product_images' => 'array',   // JSONB <-> PHP array auto-cast
         'published'      => 'boolean',
+        'price'          => PriceCast::class,
+        'old_price'      => PriceCast::class,
         'created_at'     => 'datetime',
         'updated_at'     => 'datetime',
     ];

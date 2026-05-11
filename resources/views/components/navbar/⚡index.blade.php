@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 new class extends Component
@@ -7,6 +9,30 @@ new class extends Component
     public function goTo(string $name)
     {
         return redirect()->route($name);
+    }
+
+    #[On('sign-out')]
+    public function signOut(): void
+    {
+        Auth::guard('customer')->logout();
+
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        $this->redirect('/');
+    }
+
+    public function openTheSignOutConfirmationModal(): void
+    {
+        $this->dispatch(
+            'open-confirmation-modal',
+            title: 'Sign out',
+            message: 'Are you sure you want to sign out?',
+            callEvent: 'sign-out',
+            confirmText: 'Yes',
+            cancelText: 'No',
+            confirmColor: 'red',
+        );
     }
 };
 ?>
@@ -23,6 +49,8 @@ new class extends Component
                 class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">Home</a>
             <a <a href="/products"
                 class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">Products</a>
+
+            @if (Auth::guard('customer')->check())
             <a href="/orders"
                 class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors flex items-center gap-1">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -32,6 +60,8 @@ new class extends Component
                 </svg>
                 Orders
             </a>
+            @endif
+
             <a
                 class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors flex items-center gap-1">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -44,22 +74,36 @@ new class extends Component
 
         <div class="flex items-center gap-2">
 
-            <div>
+            <div class="hidden md:flex">
                 <button wire:click='goTo("order-request")' class="btn-primary">Order
                     Request</button>
             </div>
 
-            <div class="hidden md:flex items-center gap-2">
+            @if (auth('customer')->check())
+            <div class="items-center gap-2">
+                <button wire:click="goTo('orders')" class="btn md:hidden">
+                    Orders
+                </button>
+                <button wire:click="openTheSignOutConfirmationModal" class="btn">
+                    Sign Out
+                </button>
+            </div>
+            @else
+            <div class="flex items-center gap-2">
                 <button wire:click="$dispatch('open-auth-modal', { mode: 'signin' })" class="btn">Sign
                     in</button>
                 <button wire:click="$dispatch('open-auth-modal', { mode: 'signup' })" class="btn">Sign
                     up</button>
             </div>
-            <div
-                class="w-10 h-10 rounded-full bg-[#EEEDFE] flex items-center justify-center text-xs font-medium text-[#3C3489] cursor-pointer"
-                wire:click="$dispatch('open-profile-modal')"
-                >
-                JD</div>
+            @endif
+
+
+            @auth('customer')
+            <div class="w-10 h-10 rounded-full bg-[#EEEDFE] flex items-center justify-center text-xs font-medium text-[#3C3489] cursor-pointer"
+                wire:click="$dispatch('open-profile-modal')">{{
+                strtoupper(substr(Auth::guard('customer')->user()->full_name, 0, 1)) }}</div>
+            @endauth
+
         </div>
     </div>
 
