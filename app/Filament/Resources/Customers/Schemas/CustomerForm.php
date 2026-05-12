@@ -59,20 +59,20 @@ class CustomerForm
                         ->columnSpanFull(),
                 ]),
 
-            Section::make('Avatar')
-                ->description('Upload a profile picture (max 4 MB).')
-                ->icon('heroicon-o-photo')
-                ->schema([
-                    FileUpload::make('avatar_url')
-                        ->label('Profile Picture')
-                        ->image()
-                        ->disk('public')
-                        ->directory(StoragePath::CustomerAvatar->value)
-                        ->imageEditor()
-                        ->circleCropper()
-                        ->maxSize(4096)
-                        ->columnSpanFull(),
-                ]),
+            // Section::make('Avatar')
+            //     ->description('Upload a profile picture (max 4 MB).')
+            //     ->icon('heroicon-o-photo')
+            //     ->schema([
+            //         FileUpload::make('avatar_url')
+            //             ->label('Profile Picture')
+            //             ->image()
+            //             ->disk('public')
+            //             ->directory(StoragePath::CustomerAvatar->value)
+            //             ->imageEditor()
+            //             ->circleCropper()
+            //             ->maxSize(4096)
+            //             ->columnSpanFull(),
+            //     ]),
             ]);
     }
 }

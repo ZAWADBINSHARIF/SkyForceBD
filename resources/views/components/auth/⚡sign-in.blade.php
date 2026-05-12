@@ -28,11 +28,11 @@ new class extends Component
         $this->loading = true;
 
         $credentials = [
-            'phone'    => preg_replace('/\D/', '', $this->phone),
+            'phone_number'    => preg_replace('/\D/', '', $this->phone),
             'password' => $this->password,
         ];
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::guard('customer')->attempt($credentials)) {
             $this->dispatch('close-auth-modal');
             $this->redirect(route('home'), navigate: true);
             return;
@@ -140,7 +140,6 @@ new class extends Component
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            Signing in...
         </span>
     </button>
 

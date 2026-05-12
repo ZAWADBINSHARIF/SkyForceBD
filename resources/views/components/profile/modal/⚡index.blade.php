@@ -81,19 +81,22 @@ new class extends Component
     {
         $this->validate([
             'current_password'          => ['required'],
-            'new_password'              => ['required', Password::min(8)->mixedCase()->numbers(), 'confirmed'],
+            'new_password'              => ['required', 'min:6', 'confirmed'],
             'new_password_confirmation' => ['required'],
         ], [
             'new_password.confirmed' => 'Passwords do not match.',
         ]);
 
-        if (! Hash::check($this->current_password, Auth::guard('customer')->user()->password)) {
+        $user = Auth::guard('customer')->user();
+
+        if (! Hash::check($this->current_password, $user->password_hash)) {
             $this->addError('current_password', 'Current password is incorrect.');
+
             return;
         }
 
-        Auth::guard('customer')->user()->update([
-            'password' => Hash::make($this->new_password),
+        $user->update([
+            'password_hash' => Hash::make($this->new_password),
         ]);
 
         $this->reset(['current_password', 'new_password', 'new_password_confirmation']);

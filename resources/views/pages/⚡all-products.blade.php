@@ -142,7 +142,7 @@ new class extends Component
 
                                 <button wire:click="orderRequest('{{ route('product', $product->slug) }}')"
                                     class="flex-1 py-1.5 text-xs font-semibold text-white bg-primary-500 rounded-lg">
-                                    Order
+                                    Request Order
                                 </button>
 
                                 <a href="/product/{{ $product->slug }}"
@@ -162,7 +162,7 @@ new class extends Component
 
                 {{-- PAGINATION --}}
                 {{-- PAGINATION --}}
-                <div class="mt-8 [&_*]:!text-gray-700 [&_*]:!bg-transparent [&_[aria-current=page]_span]:!bg-primary-500 [&_[aria-current=page]_span]:!text-white [&_[aria-current=page]_span]:!border-primary-500"
+                <div class="mt-8 **:text-gray-700! **:bg-transparent! [&_[aria-current=page]_span]:bg-primary-500! [&_[aria-current=page]_span]:text-white! [&_[aria-current=page]_span]:border-primary-500!"
                     style="color-scheme: light;">
                     {{ $this->products()->links() }}
                 </div>

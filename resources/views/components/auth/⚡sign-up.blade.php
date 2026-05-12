@@ -1,20 +1,23 @@
 <?php
 
+use App\Models\Customer;
 use App\Models\User;
+use App\Services\BulkSMSBDService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 new class extends Component
 {
-    public int $step = 1; // 1 = form, 2 = OTP
+    public int $step = 1;
 
-    // Step 1
+    // ── Step 1 fields ─────────────────────────────────────────────
     #[Validate('required|string|min:2', message: 'Name must be at least 2 characters.')]
     public string $name = '';
 
-    #[Validate('required|string|regex:/^[0-9+\-\s]{7,15}$/|unique:users,phone', message: 'Enter a valid, unused phone number.')]
+    #[Validate('required|string|regex:/^\+?[0-9\-\s]{7,15}$/|unique:customers,phone_number', message: 'Enter a valid, unused phone number.')]
     public string $phone = '';
 
     #[Validate('required|string|min:6', message: 'Password must be at least 6 characters.')]
@@ -23,29 +26,36 @@ new class extends Component
     #[Validate('required|same:password', message: 'Passwords do not match.')]
     public string $passwordConfirmation = '';
 
-    // Step 2 - OTP
+    // ── Step 2 fields ─────────────────────────────────────────────
     public string $otp = '';
-    public string $otpSent = '';
-    public int $otpExpiry = 0;
-    public bool $otpResendable = false;
 
+    // ── UI state ──────────────────────────────────────────────────
     public bool $showPassword = false;
-    public bool $showConfirm = false;
+    public bool $showConfirm  = false;
 
+    // ── OTP cache key ─────────────────────────────────────────────
+    private function otpCacheKey(): string
+    {
+        return 'otp:signup:' . preg_replace('/\D/', '', $this->phone);
+    }
+
+    // ── Toggles ───────────────────────────────────────────────────
     public function togglePassword(): void
     {
         $this->showPassword = ! $this->showPassword;
     }
+
     public function toggleConfirm(): void
     {
-        $this->showConfirm  = ! $this->showConfirm;
+        $this->showConfirm = ! $this->showConfirm;
     }
 
+    // ── Step 1 — validate & send OTP ─────────────────────────────
     public function sendOtp(): void
     {
         $this->validate([
             'name'                 => 'required|string|min:2',
-            'phone'                => 'required|string|regex:/^[0-9+\-\s]{7,15}$/|unique:users,phone',
+            'phone'                => 'required|string|regex:/^\+?[0-9\-\s]{7,15}$/|unique:customers,phone_number',
             'password'             => 'required|string|min:6',
             'passwordConfirmation' => 'required|same:password',
         ], [
@@ -60,20 +70,32 @@ new class extends Component
             'passwordConfirmation.same'     => 'Passwords do not match.',
         ]);
 
-        // Generate OTP
         $code = (string) random_int(100000, 999999);
-        $this->otpSent   = $code;
-        $this->otpExpiry = now()->addMinutes(5)->timestamp;
-        $this->otpResendable = false;
 
-        // TODO: send $code to $this->phone via SMS gateway
+        // Store OTP in cache for 5 minutes — keyed by normalised phone
+        Cache::put(
+            key: $this->otpCacheKey(),
+            value: $code,
+            ttl: now()->addMinutes(5),
+        );
+
+        // Send OTP via BulkSMSBD
+        $sms      = app(BulkSMSBDService::class);
+        $response = $sms->send(
+            numbers: [$this->phone],
+            message: "Your Sky Force BD verification OTP code is: {$code}. Valid for 5 minutes. Do not share this code.",
+        );
+
+        if (! $response->successful()) {
+            $this->addError('phone', 'Failed to send OTP: ' . $response->errorLabel());
+            return;
+        }
 
         $this->step = 2;
-
-        // Allow resend after 60s (use a real timer in production)
         $this->dispatch('otp-sent');
     }
 
+    // ── Step 2 — verify OTP & create account ─────────────────────
     public function verifyOtp(): void
     {
         if (empty($this->otp)) {
@@ -81,40 +103,64 @@ new class extends Component
             return;
         }
 
-        if (now()->timestamp > $this->otpExpiry) {
+        $cached = Cache::get($this->otpCacheKey());
+
+        if ($cached === null) {
             $this->addError('otp', 'OTP has expired. Please resend.');
             return;
         }
 
-        if ($this->otp !== $this->otpSent) {
+        if ($this->otp !== $cached) {
             $this->addError('otp', 'Invalid OTP. Please try again.');
             return;
         }
 
-        $user = User::create([
-            'name'     => $this->name,
-            'phone'    => preg_replace('/\D/', '', $this->phone),
-            'password' => Hash::make($this->password),
+        // OTP verified — delete it so it can't be reused
+        Cache::forget($this->otpCacheKey());
+
+        $customer = Customer::create([
+            'full_name'     => $this->name,
+            'phone_number'  => preg_replace('/\D/', '', $this->phone),
+            'password_hash' => Hash::make($this->password),
         ]);
 
-        Auth::login($user);
+        Auth::guard('customer')->login($customer, remember: false);
 
         $this->dispatch('close-auth-modal');
         $this->redirect(route('home'), navigate: true);
     }
 
+    // ── Resend OTP ────────────────────────────────────────────────
     public function resendOtp(): void
     {
+        // Rate-limit: block if a valid OTP already exists
+        if (Cache::has($this->otpCacheKey())) {
+            $this->addError('otp', 'Please wait before requesting a new OTP.');
+            return;
+        }
+
         $code = (string) random_int(100000, 999999);
-        $this->otpSent   = $code;
-        $this->otpExpiry = now()->addMinutes(5)->timestamp;
+
+        Cache::put(
+            key: $this->otpCacheKey(),
+            value: $code,
+            ttl: now()->addMinutes(5),
+        );
+
+        $sms = app(BulkSMSBDService::class);
+        $sms->send(
+            numbers: [$this->phone],
+            message: "Your Sky Force BD verification code is: {$code}. Valid for 5 minutes. Do not share this code.",
+        );
+
         $this->resetErrorBag('otp');
         $this->otp = '';
-        // TODO: send $code to $this->phone via SMS gateway
     }
 
+    // ── Back to step 1 ────────────────────────────────────────────
     public function goBack(): void
     {
+        Cache::forget($this->otpCacheKey());
         $this->step = 1;
         $this->otp  = '';
         $this->resetErrorBag();
