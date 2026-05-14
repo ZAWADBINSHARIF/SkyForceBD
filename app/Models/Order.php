@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
@@ -45,6 +46,15 @@ class Order extends Model
         'created_at'         => 'datetime',
         'updated_at'         => 'datetime',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function (Model $model) {
+            if (empty($order->order_id)) {
+                $model->order_number = "SKY" . "-" . now(6)->format('dmY') . "-" . strtoupper(Str::random(8));
+            }
+        });
+    }
 
     public function customer(): BelongsTo
     {

@@ -67,7 +67,9 @@ new class extends Component
             'phone_number.regex'    => 'Enter a valid phone number.',
         ]);
 
+        /** @var Illuminate\Contracts\Auth\Guard::user $user */
         $user = Auth::guard('customer')->user();
+        
         $user->update([
             'full_name'    => $this->full_name,
             'address'      => $this->address,
@@ -87,6 +89,7 @@ new class extends Component
             'new_password.confirmed' => 'Passwords do not match.',
         ]);
 
+        /** @var Illuminate\Contracts\Auth\Guard::user $user */
         $user = Auth::guard('customer')->user();
 
         if (! Hash::check($this->current_password, $user->password_hash)) {

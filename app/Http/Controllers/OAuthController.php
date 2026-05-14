@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AuthProviderName;
+use App\Enums\StoragePath;
 use App\Models\AuthProvider;
 use App\Models\Customer;
 use Illuminate\Http\RedirectResponse;
@@ -11,7 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Contracts\User as SocialUser;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class OAuthController extends Controller
 {
@@ -72,7 +74,7 @@ class OAuthController extends Controller
             $customer = Customer::create([
                 'full_name'     => $social->getName() ?? 'Unknown',
                 'email'         => $email ?? (string) Str::uuid(),
-                'avatar_url'    => $social->getAvatar(),
+                'avatar_url'    => $this->storeAvatar($social->getAvatar(), $social->getId()),
                 'password_hash' => null,
             ]);
         }
@@ -86,5 +88,44 @@ class OAuthController extends Controller
         ]);
 
         return $customer;
+    }
+
+    /**
+     * Download the avatar from the provider and store it locally.
+     * Returns the storage path, or null if download fails.
+     */
+    private function storeAvatar(?string $url, string|int $providerId): ?string
+    {
+        if ($url === null) {
+            return null;
+        }
+
+        try {
+            $response = Http::withOptions(['verify' => false])
+                ->timeout(10)
+                ->get($url);
+
+            if (! $response->successful()) {
+                return null;
+            }
+
+            // Detect extension from Content-Type header
+            $contentType = $response->header('Content-Type') ?? 'image/jpeg';
+            $extension   = match (true) {
+                str_contains($contentType, 'png')  => 'png',
+                str_contains($contentType, 'webp') => 'webp',
+                str_contains($contentType, 'gif')  => 'gif',
+                default                            => 'jpg',
+            };
+
+            $filename = $providerId . '_' . time() . '.' . $extension;
+            $path     = StoragePath::CustomerAvatar->value . '/' . $filename;
+
+            Storage::disk('public')->put($path, $response->body());
+
+            return $path;
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

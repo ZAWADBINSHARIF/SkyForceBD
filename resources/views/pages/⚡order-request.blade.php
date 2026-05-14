@@ -1,10 +1,15 @@
 <?php
 
+use App\Traits\WithSslCommerz;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
 new class extends Component
 {
+    use WithSslCommerz;
+
+    public float $amount = 65;
+
     public int $step = 3;
     public int $totalSteps = 3;
 
@@ -25,6 +30,14 @@ new class extends Component
     public string $customerName = 'Asif Ahemd';
     public string $phoneNumber = '01732754990';
     public string $additionalNote = 'Anything done';
+    public string $email = 'info@skyforcebd.com';
+
+    public ?string $fullAddress = null;
+    public string $product_name = 'Order Request';
+    public string $product_category = 'inquiry';
+    public string $product_profile = 'non-physical-goods';
+
+    public bool   $shipping_method = false;
 
     // Step 2
     // public bool $agreedToTerms = false;
@@ -47,6 +60,9 @@ new class extends Component
                 'quantity' => 2,
             ];
         }
+
+        $this->setPostData();
+        // dump($this->post_data);
     }
 
     protected function rules(): array
@@ -55,7 +71,7 @@ new class extends Component
             'products'             => 'required|array|min:1',
             'products.*.link'      => 'required|url',
             'products.*.quantity'  => 'required|integer|min:1',
-            'customerName'         => 'string|nullable',
+            'customerName'         => 'required|string|min:3',
             'phoneNumber'          => 'required|string|regex:/^[0-9+\-\s]{7,15}$/',
             'additionalNote'       => 'nullable|string|max:500',
         ];
@@ -98,14 +114,7 @@ new class extends Component
 
     public function goToStep2(): void
     {
-        $this->validate([
-            'products'             => 'required|array|min:1',
-            'products.*.link'      => 'required|url',
-            'products.*.quantity'  => 'required|integer|min:1',
-            'customerName'         => 'nullable|string',
-            'phoneNumber'          => 'required|string|regex:/^[0-9+\-\s]{7,15}$/',
-            'additionalNote'       => 'nullable|string|max:500',
-        ], $this->messages());
+        $this->validate($this->rules(), $this->messages());
 
         $this->step = 2;
     }
@@ -127,13 +136,16 @@ new class extends Component
         }
     }
 
-    public function submitPayment(): void
+    public function handlePaymentSslCommerz(): void
     {
         // Handle payment logic here
-        session()->flash('success', 'Order request submitted successfully!');
-        $this->reset();
-        $this->step = 1;
-        $this->products = [['link' => '', 'quantity' => 1]];
+        // session()->flash('success', 'Order request submitted successfully!');
+        // $this->reset();
+        // $this->step = 1;
+        // $this->products = [['link' => '', 'quantity' => 1]];
+
+        $this->setPostData();
+        $this->paymentForOrderRequest();
     }
 
 
@@ -163,7 +175,7 @@ new class extends Component
         // TODO: handle each method
         match ($this->selectedMethod) {
             'bkash'       => $this->redirect(route('payment.bkash')),
-            'sslcommerz'  => $this->redirect(route('payment.sslcommerz')),
+            'sslcommerz'  => $this->handlePaymentSslCommerz(),
             'bank'        => $this->redirect(route('payment.bank')),
             default       => null,
         };
@@ -285,7 +297,9 @@ new class extends Component
         <div class="border-t border-gray-100 pt-4 space-y-3">
             {{-- Customer Name --}}
             <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1.5">Customer Name</label>
+                <label class="block text-xs font-semibold text-gray-600 mb-1.5">
+                    Customer Name <span class="text-red-400">*</span>
+                </label>
                 <input type="text" wire:model.blur="customerName" placeholder="Your full name"
                     class="w-full px-3 py-2 text-sm border rounded-lg outline-none transition-colors placeholder:text-gray-300
                                 {{ $errors->has('customerName') ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-primary-400' }}" />
