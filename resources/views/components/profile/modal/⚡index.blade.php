@@ -1,40 +1,51 @@
 <?php
 
+use App\Models\Customer;
+use App\Services\BulkSMSBDService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 new class extends Component
 {
     // Modal state
-    public bool $show = false;
+    public bool   $show      = false;
     public string $activeTab = 'profile';
 
     // Profile fields
-    public string $full_name = '';
-    public string $address = '';
+    public string $full_name    = '';
+    public string $address      = '';
     public string $phone_number = '';
-    public string $email = '';
+
+    // Phone OTP flow
+    public string $pending_phone = '';       // new number waiting for OTP
+    public bool   $showOtpField  = false;
+    public string $phone_otp     = '';
 
     // Password fields
-    public string $current_password = '';
-    public string $new_password = '';
+    public string $current_password          = '';
+    public string $new_password              = '';
     public string $new_password_confirmation = '';
 
-    // Feedback messages
+    // Feedback
     public string $profileSuccess = '';
     public string $passwordSuccess = '';
+    public string $phoneOtpError  = '';
+
+    // ── Boot ────────────────────────────────────────────────────────
 
     public function mount(): void
     {
         $user = Auth::guard('customer')->user();
-        $this->full_name     = $user->full_name     ?? $user->name ?? '';
-        $this->address       = $user->address       ?? '';
-        $this->phone_number  = $user->phone_number  ?? '';
-        $this->email         = $user->email  ?? '';
+
+        $this->full_name    = $user->full_name    ?? '';
+        $this->address      = $user->address      ?? '';
+        $this->phone_number = $user->phone_number ?? '';
     }
+
+    // ── Modal ────────────────────────────────────────────────────────
 
     #[On('open-profile-modal')]
     public function openModal(): void
@@ -46,38 +57,148 @@ new class extends Component
     public function closeModal(): void
     {
         $this->show = false;
+        $this->resetOtpFlow();
         $this->resetFeedback();
     }
 
     public function setTab(string $tab): void
     {
         $this->activeTab = $tab;
+        $this->resetOtpFlow();
         $this->resetFeedback();
         $this->resetErrorBag();
     }
 
+    // ── Profile save ─────────────────────────────────────────────────
+
     public function saveProfile(): void
     {
         $this->validate([
-            'full_name'    => ['required', 'string', 'max:100'],
-            'address'      => ['nullable', 'string', 'max:255'],
-            'phone_number' => ['nullable', 'regex:/^[0-9\+\-\(\)\s]{7,20}$/'],
+            'full_name' => ['required', 'string', 'max:100'],
+            'address'   => ['nullable', 'string', 'max:255'],
         ], [
-            'full_name.required'    => 'Full name is required.',
-            'phone_number.regex'    => 'Enter a valid phone number.',
+            'full_name.required' => 'Full name is required.',
         ]);
 
-        /** @var Illuminate\Contracts\Auth\Guard::user $user */
+        /** @var Customer $user */
         $user = Auth::guard('customer')->user();
-        
+
+        $newPhone = trim($this->phone_number);
+        // Phone changed — start OTP flow instead of saving directly
+        if ($newPhone !== $user->phone_number) {
+            $this->validateOnly('phone_number', [
+                'phone_number' => [
+                    'required',
+                    'regex:/^[0-9\+\-\(\)\s]{7,20}$/',
+                    'unique:customers,phone_number',
+                    'max:11'
+                ],
+            ], [
+                'phone_number.regex'  => 'Enter a valid phone number.',
+                'phone_number.unique' => 'This number is already registered.',
+            ]);
+
+            // Save name/address immediately, hold phone until OTP confirmed
+            $user->update([
+                'full_name' => $this->full_name,
+                'address'   => $this->address,
+            ]);
+
+            // dd($newPhone);
+            $this->sendPhoneOtp($newPhone);
+            return;
+        }
+
         $user->update([
-            'full_name'    => $this->full_name,
-            'address'      => $this->address,
-            'phone_number' => $this->phone_number,
+            'full_name' => $this->full_name,
+            'address'   => $this->address,
         ]);
 
         $this->profileSuccess = 'Profile updated successfully.';
     }
+
+    // ── Phone OTP ─────────────────────────────────────────────────────
+
+    private function otpCacheKey(string $phone): string
+    {
+        return 'otp:phone_update:' . preg_replace('/\D/', '', $phone);
+    }
+
+    private function sendPhoneOtp(string $phone): void
+    {
+        $code = (string) random_int(100000, 999999);
+
+        Cache::put($this->otpCacheKey($phone), $code, now()->addMinutes(5));
+
+        $sms      = app(BulkSMSBDService::class);
+        $response = $sms->send(
+            numbers: [$phone],
+            message: "Your Sky Force BD verification code is: {$code}. Valid for 5 minutes.",
+        );
+
+        if (! $response->successful()) {
+            $this->addError('phone_number', 'Failed to send OTP: ' . $response->errorLabel());
+            return;
+        }
+
+        $this->pending_phone = $phone;
+        $this->showOtpField  = true;
+        $this->phone_otp     = '';
+        $this->phoneOtpError = '';
+    }
+
+    public function verifyPhoneOtp(): void
+    {
+        if (empty($this->phone_otp)) {
+            $this->phoneOtpError = 'Please enter the OTP.';
+            return;
+        }
+
+        $cached = Cache::get($this->otpCacheKey($this->pending_phone));
+
+        if ($cached === null) {
+            $this->phoneOtpError = 'OTP has expired. Please resend.';
+            return;
+        }
+
+        if ($this->phone_otp !== $cached) {
+            $this->phoneOtpError = 'Invalid OTP. Please try again.';
+            return;
+        }
+
+        Cache::forget($this->otpCacheKey($this->pending_phone));
+
+        /** @var Customer $user */
+        $user = Auth::guard('customer')->user();
+
+        $user->update(['phone_number' => $this->pending_phone]);
+
+        $this->phone_number = $this->pending_phone;
+        $this->resetOtpFlow();
+        $this->profileSuccess = 'Profile and phone number updated successfully.';
+    }
+
+    public function resendPhoneOtp(): void
+    {
+        if (Cache::has($this->otpCacheKey($this->pending_phone))) {
+            $this->phoneOtpError = 'Please wait before requesting a new OTP.';
+            return;
+        }
+
+        $this->sendPhoneOtp($this->pending_phone);
+    }
+
+    public function cancelOtp(): void
+    {
+        /** @var Customer $user */
+        $user = Auth::guard('customer')->user();
+
+        // Restore the original phone in the field
+        $this->phone_number = $user->phone_number ?? '';
+        $this->resetOtpFlow();
+    }
+
+    // ── Password ──────────────────────────────────────────────────────
 
     public function changePassword(): void
     {
@@ -89,33 +210,40 @@ new class extends Component
             'new_password.confirmed' => 'Passwords do not match.',
         ]);
 
-        /** @var Illuminate\Contracts\Auth\Guard::user $user */
+        /** @var Customer $user */
         $user = Auth::guard('customer')->user();
 
         if (! Hash::check($this->current_password, $user->password_hash)) {
             $this->addError('current_password', 'Current password is incorrect.');
-
             return;
         }
 
-        $user->update([
-            'password_hash' => Hash::make($this->new_password),
-        ]);
+        $user->update(['password_hash' => Hash::make($this->new_password)]);
 
         $this->reset(['current_password', 'new_password', 'new_password_confirmation']);
         $this->passwordSuccess = 'Password changed successfully.';
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────
+
+    private function resetOtpFlow(): void
+    {
+        $this->showOtpField  = false;
+        $this->pending_phone = '';
+        $this->phone_otp     = '';
+        $this->phoneOtpError = '';
     }
 
     private function resetFeedback(): void
     {
         $this->profileSuccess = '';
         $this->passwordSuccess = '';
+        $this->phoneOtpError  = '';
     }
 };
 ?>
 
 <div>
-    {{-- ── Backdrop + Modal ───────────────────────────────────────────── --}}
     @if ($show)
     <div x-data x-on:keydown.escape.window="$dispatch('close-profile-modal')"
         class="fixed inset-0 z-40 flex items-center justify-center p-4">
@@ -127,16 +255,16 @@ new class extends Component
         <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl
                     ring-1 ring-slate-200 overflow-hidden" role="dialog" aria-modal="true" aria-label="Edit Profile">
 
-            {{-- ── Header ────────────────────────────────────────────── --}}
+            {{-- ── Header ── --}}
             <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-9 h-9 rounded-full bg-primary-500 flex items-center justify-center text-white text-sm font-bold select-none">
-                        {{ strtoupper(substr(Auth::guard('customer')->user()->name ?? 'U', 0, 1)) }}
+                        {{ strtoupper(substr(Auth::guard('customer')->user()->full_name ?? 'U', 0, 1)) }}
                     </div>
                     <div>
                         <p class="text-sm font-semibold text-slate-800 leading-tight">Account Settings</p>
-                        <p class="text-xs text-slate-400">{{ Auth::guard('customer')->user()->email ?? '' }}</p>
+                        <p class="text-xs text-slate-400">{{ Auth::guard('customer')->user()->phone_number ?? '' }}</p>
                     </div>
                 </div>
                 <button wire:click="$dispatch('close-profile-modal')"
@@ -147,30 +275,30 @@ new class extends Component
                 </button>
             </div>
 
-            {{-- ── Tab Bar ────────────────────────────────────────────── --}}
+            {{-- ── Tab Bar ── --}}
             <div class="flex border-b border-slate-100 px-6 gap-1">
-                @foreach ([['profile','Profile'], ['password','Password']] as [$key, $label])
+                @foreach ([['profile', 'Profile'], ['password', 'Password']] as [$key, $label])
                 <button wire:click="setTab('{{ $key }}')"
                     @class([ 'relative px-4 py-3 text-sm font-medium transition-colors'
                     , 'text-slate-800 after:absolute after:bottom-0 after:inset-x-0 after:h-0.5 after:bg-primary-500 after:rounded-t-full'=>
                     $activeTab === $key,
-                    'text-slate-400 hover:text-slate-600'
-                    => $activeTab !== $key,
+                    'text-slate-400 hover:text-slate-600' => $activeTab !== $key,
                     ])>
                     {{ $label }}
                 </button>
                 @endforeach
             </div>
 
-            {{-- ── Tab Content ─────────────────────────────────────────── --}}
+            {{-- ── Tab Content ── --}}
             <div class="px-6 py-6 space-y-5">
 
                 {{-- ════════ PROFILE TAB ════════ --}}
                 @if ($activeTab === 'profile')
 
+                {{-- Success banner --}}
                 @if ($profileSuccess)
                 <div class="flex items-center gap-2 text-sm text-emerald-700
-                                bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                            bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
                     <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                         stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75 9 17.25l10.5-10.5" />
@@ -186,11 +314,11 @@ new class extends Component
                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                             Full Name
                         </label>
-                        <input wire:model="full_name" type="text" placeholder="Jane Doe"
-                            class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800
-                                          placeholder-slate-300 outline-none transition
-                                          @error('full_name') border-rose-400 bg-rose-50 @else border-slate-200 bg-slate-50
-                                          focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200 @enderror">
+                        <input wire:model="full_name" type="text" placeholder="Jane Doe" class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800
+                                   placeholder-slate-300 outline-none transition
+                                   @error('full_name') border-rose-400 bg-rose-50
+                                   @else border-slate-200 bg-slate-50 focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200
+                                   @enderror">
                         @error('full_name')
                         <p class="mt-1 text-xs text-rose-500">{{ $message }}</p>
                         @enderror
@@ -201,37 +329,104 @@ new class extends Component
                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                             Address
                         </label>
-                        <textarea wire:model="address" rows="2" placeholder="123 Main St, City, Country"
-                            class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800
-                                             placeholder-slate-300 outline-none transition resize-none
-                                             @error('address') border-rose-400 bg-rose-50 @else border-slate-200 bg-slate-50
-                                             focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200 @enderror"></textarea>
+                        <textarea wire:model="address" rows="2" placeholder="123 Main St, City, Country" class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800
+                                   placeholder-slate-300 outline-none transition resize-none
+                                   @error('address') border-rose-400 bg-rose-50
+                                   @else border-slate-200 bg-slate-50 focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200
+                                   @enderror"></textarea>
                         @error('address')
                         <p class="mt-1 text-xs text-rose-500">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- Phone --}}
+                    {{-- Phone Number --}}
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                             Phone Number
                         </label>
-                        <input wire:model="phone_number" type="tel" placeholder="+1 (555) 000-0000"
-                            class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800
-                                          placeholder-slate-300 outline-none transition
-                                          @error('phone_number') border-rose-400 bg-rose-50 @else border-slate-200 bg-slate-50
-                                          focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200 @enderror">
+
+                        @if (! $showOtpField)
+                        <input wire:model="phone_number" type="tel" placeholder="+880 1XXXXXXXXX" class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800
+                                       placeholder-slate-300 outline-none transition
+                                       @error('phone_number') border-rose-400 bg-rose-50
+                                       @else border-slate-200 bg-slate-50 focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200
+                                       @enderror">
                         @error('phone_number')
                         <p class="mt-1 text-xs text-rose-500">{{ $message }}</p>
                         @enderror
+                        <p class="mt-1.5 text-xs text-slate-400">
+                            Changing your number will require OTP verification.
+                        </p>
+
+                        @else
+                        {{-- OTP verification panel --}}
+                        <div class="rounded-xl border border-primary-200 bg-primary-50 p-4 space-y-3">
+
+                            <div class="flex items-start gap-2.5">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4 text-primary-500" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-primary-700">Verify your new number</p>
+                                    <p class="text-xs text-primary-600 mt-0.5">
+                                        OTP sent to <span class="font-bold">{{ $pending_phone }}</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- OTP input --}}
+                            <input wire:model="phone_otp" type="text" inputmode="numeric" maxlength="6"
+                                placeholder="• • • • • •"
+                                class="w-full rounded-xl border px-4 py-2.5 text-lg font-bold text-center tracking-[0.4em]
+                                           outline-none transition bg-white
+                                           {{ $phoneOtpError ? 'border-rose-400 bg-rose-50' : 'border-slate-200 focus:border-primary-400 focus:ring-2 focus:ring-primary-100' }}">
+
+                            @if ($phoneOtpError)
+                            <p class="text-xs text-rose-500 text-center">{{ $phoneOtpError }}</p>
+                            @endif
+
+                            {{-- Verify + Resend + Cancel --}}
+                            <div class="flex items-center gap-2">
+                                <button wire:click="verifyPhoneOtp" type="button" class="flex-1 py-2 rounded-xl bg-primary-500 text-white text-sm font-semibold
+                                               hover:bg-primary-600 active:scale-95 transition-all">
+                                    <span wire:loading.remove wire:target="verifyPhoneOtp">Verify OTP</span>
+                                    <span wire:loading wire:target="verifyPhoneOtp"
+                                        class="inline-flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="3">
+                                            <path stroke-linecap="round" d="M12 3a9 9 0 1 0 9 9" />
+                                        </svg>
+                                        Verifying…
+                                    </span>
+                                </button>
+
+                                <button wire:click="resendPhoneOtp" type="button" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600
+                                               hover:bg-white active:scale-95 transition-all">
+                                    Resend
+                                </button>
+
+                                <button wire:click="cancelOtp" type="button" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-500
+                                               hover:bg-white active:scale-95 transition-all">
+                                    Cancel
+                                </button>
+                            </div>
+
+                        </div>
+                        @endif
                     </div>
 
-                    {{-- Actions --}}
+                    {{-- Save button — hidden while OTP is pending --}}
+                    @if (! $showOtpField)
                     <div class="flex justify-end pt-1">
                         <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary-500 text-white text-sm font-semibold
-                                           hover:bg-primary-600 active:scale-95 transition-all
-                                           disabled:opacity-60 disabled:cursor-not-allowed"
-                            wire:loading.attr="disabled" wire:target="saveProfile">
+                                   hover:bg-primary-600 active:scale-95 transition-all
+                                   disabled:opacity-60 disabled:cursor-not-allowed" wire:loading.attr="disabled"
+                            wire:target="saveProfile">
                             <span wire:loading.remove wire:target="saveProfile">Save Changes</span>
                             <span wire:loading wire:target="saveProfile" class="inline-flex items-center gap-2">
                                 <svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none"
@@ -242,6 +437,8 @@ new class extends Component
                             </span>
                         </button>
                     </div>
+                    @endif
+
                 </form>
 
                 {{-- ════════ PASSWORD TAB ════════ --}}
@@ -249,7 +446,7 @@ new class extends Component
 
                 @if ($passwordSuccess)
                 <div class="flex items-center gap-2 text-sm text-emerald-700
-                                bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                            bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
                     <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                         stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75 9 17.25l10.5-10.5" />
@@ -267,11 +464,11 @@ new class extends Component
                         </label>
                         <div class="relative">
                             <input wire:model="current_password" :type="show ? 'text' : 'password'"
-                                placeholder="Enter current password"
-                                class="w-full rounded-xl border px-4 py-2.5 pr-11 text-sm text-slate-800
-                                              placeholder-slate-300 outline-none transition
-                                              @error('current_password') border-rose-400 bg-rose-50 @else border-slate-200 bg-slate-50
-                                              focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200 @enderror">
+                                placeholder="Enter current password" class="w-full rounded-xl border px-4 py-2.5 pr-11 text-sm text-slate-800
+                                       placeholder-slate-300 outline-none transition
+                                       @error('current_password') border-rose-400 bg-rose-50
+                                       @else border-slate-200 bg-slate-50 focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200
+                                       @enderror">
                             <button type="button" @click="show = !show"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
                                 <svg x-show="!show" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
@@ -300,11 +497,11 @@ new class extends Component
                         </label>
                         <div class="relative">
                             <input wire:model="new_password" :type="show ? 'text' : 'password'"
-                                placeholder="Min. 8 chars, mixed case + number"
-                                class="w-full rounded-xl border px-4 py-2.5 pr-11 text-sm text-slate-800
-                                              placeholder-slate-300 outline-none transition
-                                              @error('new_password') border-rose-400 bg-rose-50 @else border-slate-200 bg-slate-50
-                                              focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200 @enderror">
+                                placeholder="Min. 6 characters" class="w-full rounded-xl border px-4 py-2.5 pr-11 text-sm text-slate-800
+                                       placeholder-slate-300 outline-none transition
+                                       @error('new_password') border-rose-400 bg-rose-50
+                                       @else border-slate-200 bg-slate-50 focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200
+                                       @enderror">
                             <button type="button" @click="show = !show"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
                                 <svg x-show="!show" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
@@ -332,27 +529,25 @@ new class extends Component
                             Confirm New Password
                         </label>
                         <input wire:model="new_password_confirmation" type="password"
-                            placeholder="Re-enter new password"
-                            class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800
-                                          placeholder-slate-300 outline-none transition
-                                          @error('new_password_confirmation') border-rose-400 bg-rose-50 @else border-slate-200 bg-slate-50
-                                          focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200 @enderror">
+                            placeholder="Re-enter new password" class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800
+                                   placeholder-slate-300 outline-none transition
+                                   @error('new_password_confirmation') border-rose-400 bg-rose-50
+                                   @else border-slate-200 bg-slate-50 focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-slate-200
+                                   @enderror">
                         @error('new_password_confirmation')
                         <p class="mt-1 text-xs text-rose-500">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- Hint --}}
                     <p class="text-xs text-slate-400 leading-relaxed">
-                        Password must be at least 8 characters and include uppercase, lowercase, and a number.
+                        Password must be at least 6 characters.
                     </p>
 
-                    {{-- Actions --}}
                     <div class="flex justify-end pt-1">
                         <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary-500 text-white text-sm font-semibold
-                                           hover:bg-primary-600 active:scale-95 transition-all
-                                           disabled:opacity-60 disabled:cursor-not-allowed"
-                            wire:loading.attr="disabled" wire:target="changePassword">
+                                   hover:bg-primary-600 active:scale-95 transition-all
+                                   disabled:opacity-60 disabled:cursor-not-allowed" wire:loading.attr="disabled"
+                            wire:target="changePassword">
                             <span wire:loading.remove wire:target="changePassword">Update Password</span>
                             <span wire:loading wire:target="changePassword" class="inline-flex items-center gap-2">
                                 <svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none"
@@ -363,6 +558,7 @@ new class extends Component
                             </span>
                         </button>
                     </div>
+
                 </form>
                 @endif
 

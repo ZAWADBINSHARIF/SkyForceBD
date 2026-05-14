@@ -32,18 +32,18 @@ class Customer extends Authenticatable implements AuthenticatableContract
 
     protected static function booted(): void
     {
-        static::updating(function (Banner $banner) {
-            if ($banner->isDirty('avatar_url')) {
-                $old = $banner->getOriginal('avatar_url');
+        static::updating(function (Customer $customer) {
+            if ($customer->isDirty('avatar_url')) {
+                $old = $customer->getOriginal('avatar_url');
                 if ($old) {
                     Storage::disk('public')->delete($old);
                 }
             }
         });
 
-        static::deleting(function (Banner $banner) {
-            if ($banner->avatar_url) {
-                Storage::disk('public')->delete($banner->avatar_url);
+        static::deleting(function (Customer $customer) {
+            if ($customer->avatar_url) {
+                Storage::disk('public')->delete($customer->avatar_url);
             }
         });
     }
