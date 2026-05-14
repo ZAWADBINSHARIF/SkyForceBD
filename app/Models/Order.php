@@ -65,6 +65,11 @@ class Order extends Model
         });
     }
 
+    public function getOrderNumberShortCodeAttribute(): string
+    {
+        return \Illuminate\Support\Str::afterLast($this->order_number, '-');
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
