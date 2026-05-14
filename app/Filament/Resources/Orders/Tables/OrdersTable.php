@@ -2,10 +2,17 @@
 
 namespace App\Filament\Resources\Orders\Tables;
 
+use App\Enums\DeliveryStatus;
+use App\Enums\OrderStatus;
+use App\Enums\ShipmentType;
+use App\Enums\WorkProcess;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\QueryBuilder\Constraints\DateConstraint;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
@@ -27,32 +34,22 @@ class OrdersTable
                     ->searchable()
                     ->description(fn($record) => $record->customer_phone),
 
+                TextColumn::make('order_status')
+                    ->label('Order Status')
+                    ->badge()
+                    ->sortable(),
+
                 TextColumn::make('delivery_status')
                     ->label('Delivery')
-                    ->badge()
-                    ->color(fn(string $state) => match ($state) {
-                        'pending'    => 'gray',
-                        'processing' => 'warning',
-                        'shipped'    => 'info',
-                        'delivered'  => 'success',
-                        'cancelled'  => 'danger',
-                    }),
+                    ->badge(),        // color + icon come from the enum
 
                 TextColumn::make('work_process')
                     ->label('Process')
-                    ->badge()
-                    ->color(fn(string $state) => match ($state) {
-                        'pending'    => 'gray',
-                        'processing' => 'warning',
-                        'purchased'  => 'info',
-                        'shipped'    => 'primary',
-                        'completed'  => 'success',
-                    }),
+                    ->badge(),
 
                 TextColumn::make('shipment_type')
                     ->label('Shipment')
-                    ->badge()
-                    ->color('gray'),
+                    ->badge(),
 
                 TextColumn::make('total_price')
                     ->label('Total (৳)')
@@ -81,31 +78,32 @@ class OrdersTable
                     ->toggleable(),
             ])
             ->filters([
+                SelectFilter::make('order_status')
+                    ->options(OrderStatus::class)
+                    ->native(false),
+
                 SelectFilter::make('delivery_status')
-                    ->options([
-                        'pending'    => 'Pending',
-                        'processing' => 'Processing',
-                        'shipped'    => 'Shipped',
-                        'delivered'  => 'Delivered',
-                        'cancelled'  => 'Cancelled',
-                    ]),
+                    ->options(DeliveryStatus::class)
+                    ->native(false),
 
                 SelectFilter::make('work_process')
-                    ->options([
-                        'pending'    => 'Pending',
-                        'processing' => 'Processing',
-                        'purchased'  => 'Purchased',
-                        'shipped'    => 'Shipped',
-                        'completed'  => 'Completed',
-                    ]),
+                    ->options(WorkProcess::class)
+                    ->native(false),
 
                 SelectFilter::make('shipment_type')
-                    ->options([
-                        'air'  => 'Air',
-                        'sea'  => 'Sea',
-                        'road' => 'Road',
+                    ->options(ShipmentType::class)
+                    ->native(false),
+
+                SelectFilter::make('order_call')
+                    ->relationship('user', 'name')
+                    ->native(false),
+
+                QueryBuilder::make()
+                    ->constraints([
+                        DateConstraint::make('order_place_date'),
                     ]),
-            ])
+
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 EditAction::make(),
             ])

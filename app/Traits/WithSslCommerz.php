@@ -3,10 +3,12 @@
 
 namespace App\Traits;
 
+use App\Enums\OrderStatus;
 use App\Library\SslCommerz\SslCommerzNotification;
 use App\Models\Order;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -19,6 +21,7 @@ use Illuminate\Support\Facades\Log;
  * @property ?string $fullAddress
  * @property string $email
  * @property string $phoneNumber
+ * @property string $additionalNote
  * 
  * Product
  * @property string $product_name
@@ -82,7 +85,9 @@ trait WithSslCommerz
             'customer_id' => Auth::guard('customer')->user()->id ?? null,
             'products' => $this->products,
             'customer_name' => $this->customerName,
-            'customer_phone' => $this->phoneNumber
+            'customer_phone' => $this->phoneNumber,
+            'customer_address' => $this->additionalNote,
+            'customer_remark' => $this->additionalNote
         ]);
 
         Transaction::create([

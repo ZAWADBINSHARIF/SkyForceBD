@@ -2,7 +2,11 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
+use App\Enums\DeliveryStatus;
 use App\Enums\FieldLength;
+use App\Enums\OrderStatus;
+use App\Enums\ShipmentType;
+use App\Enums\WorkProcess;
 use App\Models\Customer;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -12,6 +16,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Operation;
 
 class OrderForm
 {
@@ -29,9 +34,11 @@ class OrderForm
                             ->label('Order Number')
                             ->required()
                             ->unique(ignoreRecord: true)
-                            ->maxLength(FieldLength::Short->value)
-                            ->placeholder('#SKY10001')
-                            ->columnSpan(1),
+                            ->maxLength(FieldLength::Default->value)
+                            ->placeholder('#SKY-dmy-EWRE8990932')
+                            ->columnSpan(1)
+                            ->hiddenOn(Operation::Create)
+                            ->disabled(),
 
                         DateTimePicker::make('order_receive_date')
                             ->label('Received At')
@@ -44,7 +51,7 @@ class OrderForm
                             ->nullable()
                             ->helperText('Set when advance payment is confirmed.')
                             ->columnSpan(1),
-                    ]),
+                    ])->columnSpanFull(),
 
                 // ── Status & Logistics ────────────────────────────────
                 Section::make('Status & Logistics')
@@ -52,39 +59,31 @@ class OrderForm
                     ->icon('heroicon-o-truck')
                     ->columns(3)
                     ->schema([
+                        Select::make('order_status')
+                            ->label('Order Status')
+                            ->required()
+                            ->options(OrderStatus::class)
+                            ->default(OrderStatus::OrderRequest)
+                            ->native(false)
+                            ->columnSpan(1),
+
                         Select::make('delivery_status')
                             ->label('Delivery Status')
                             ->required()
-                            ->options([
-                                'pending'    => 'Pending',
-                                'processing' => 'Processing',
-                                'shipped'    => 'Shipped',
-                                'delivered'  => 'Delivered',
-                                'cancelled'  => 'Cancelled',
-                            ])
+                            ->options(DeliveryStatus::class)
                             ->native(false)
                             ->columnSpan(1),
 
                         Select::make('work_process')
                             ->label('Work Process')
                             ->required()
-                            ->options([
-                                'pending'    => 'Pending',
-                                'processing' => 'Processing',
-                                'purchased'  => 'Purchased',
-                                'shipped'    => 'Shipped',
-                                'completed'  => 'Completed',
-                            ])
+                            ->options(WorkProcess::class)
                             ->native(false)
                             ->columnSpan(1),
 
                         Select::make('shipment_type')
                             ->label('Shipment Type')
-                            ->options([
-                                'air'  => 'Air',
-                                'sea'  => 'Sea',
-                                'road' => 'Road',
-                            ])
+                            ->options(ShipmentType::class)
                             ->nullable()
                             ->native(false)
                             ->columnSpan(1),
@@ -109,7 +108,7 @@ class OrderForm
                             ->maxLength(FieldLength::Long->value)
                             ->placeholder('https://...')
                             ->columnSpan(1),
-                    ]),
+                    ])->columnSpanFull(),
 
                 // ── Products ──────────────────────────────────────────
                 Section::make('Products')
@@ -124,7 +123,7 @@ class OrderForm
                                     ->maxLength(FieldLength::Default->value)
                                     ->columnSpan(2),
 
-                                TextInput::make('product_link')
+                                TextInput::make('link')
                                     ->label('Product Link')
                                     ->url()
                                     ->required()
@@ -231,7 +230,7 @@ class OrderForm
                 Section::make('Financial Summary')
                     ->description('Pricing, payment, and outstanding balance.')
                     ->icon('heroicon-o-banknotes')
-                    ->columns(4)
+                    ->columns(3)
                     ->schema([
                         TextInput::make('total_price')
                             ->label('Total Price (৳)')
@@ -262,6 +261,7 @@ class OrderForm
                             ->nullable()
                             ->minValue(0)
                             ->default(0)
+                            ->required()
                             ->columnSpan(1),
 
                         TextInput::make('due_payment')

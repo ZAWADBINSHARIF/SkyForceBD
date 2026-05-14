@@ -4,11 +4,15 @@ namespace App\Filament\Resources\Transactions\Schemas;
 
 use App\Enums\FieldLength;
 use App\Enums\StoragePath;
+use App\Enums\TransactionStatus;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\KeyValueEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
 class TransactionForm
 {
@@ -31,17 +35,47 @@ class TransactionForm
 
                         TextInput::make('transaction_number')
                             ->label('Transaction Number')
-                            ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(FieldLength::Default->value)
                             ->placeholder('TXN-XXXXXXXX')
+                            ->readonly()
                             ->columnSpan(1),
 
                         TextInput::make('validation_id')
                             ->label('Validation ID')
                             ->nullable()
                             ->maxLength(FieldLength::Default->value)
+                            ->readOnly()
                             ->columnSpan(1),
+
+                        TextInput::make('bank_transaction_id')
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(FieldLength::Default->value)
+                            ->columnSpan(1),
+
+                        Select::make('status')
+                            ->label('Status')
+                            ->required()
+                            ->options(TransactionStatus::class)
+                            ->default('pending')
+                            ->native(false)
+                            ->columnSpan(1),
+                    ]),
+
+                Section::make('Proof of Payment')
+                    ->description('Upload bank screenshot or payment proof (max 4 MB).')
+                    ->icon('heroicon-o-photo')
+                    ->schema([
+                        FileUpload::make('bank_transaction_image')
+                            ->label('Bank / Transaction Screenshot')
+                            ->image()
+                            ->disk('public')
+                            ->directory(StoragePath::TransactionProof->value)
+                            ->maxSize(4096)
+                            ->imageEditor()
+                            ->openable()
+                            ->downloadable()
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('Payment Details')
@@ -49,17 +83,15 @@ class TransactionForm
                     ->icon('heroicon-o-banknotes')
                     ->columns(3)
                     ->schema([
-                        Select::make('payment_method')
+                        TextInput::make('payment_method')
                             ->label('Payment Method')
-                            ->options([
-                                'card'           => 'Card',
-                                'mobile_banking' => 'Mobile Banking (bKash/Nagad)',
-                                'bank_transfer'  => 'Bank Transfer',
-                                'cod'            => 'Cash on Delivery',
+                            ->datalist([
+                                'Card',
+                                'Mobile Banking (bKash/Nagad)',
+                                'Bank Transfer',
+                                'Cash on Delivery',
                             ])
-                            ->nullable()
-                            ->native(false)
-                            ->columnSpan(1),
+                            ->nullable(),
 
                         TextInput::make('card_brand')
                             ->label('Card / Wallet Brand')
@@ -95,36 +127,16 @@ class TransactionForm
                             ->minValue(0)
                             ->helperText('Amount after gateway fees.')
                             ->columnSpan(1),
+                    ])
+                    ->columnSpanFull(),
 
-                        Select::make('status')
-                            ->label('Status')
-                            ->required()
-                            ->options([
-                                'pending'  => 'Pending',
-                                'success'  => 'Success',
-                                'failed'   => 'Failed',
-                                'refunded' => 'Refunded',
-                            ])
-                            ->default('pending')
-                            ->native(false)
-                            ->columnSpan(1),
-                    ]),
-
-                Section::make('Proof of Payment')
-                    ->description('Upload bank screenshot or payment proof (max 4 MB).')
-                    ->icon('heroicon-o-photo')
+                Section::make("Raw Information")
                     ->schema([
-                        FileUpload::make('bank_transaction_image')
-                            ->label('Bank / Transaction Screenshot')
-                            ->image()
-                            ->disk('public')
-                            ->directory(StoragePath::TransactionProof->value)
-                            ->maxSize(4096)
-                            ->imageEditor()
-                            ->openable()
-                            ->downloadable()
-                            ->columnSpanFull(),
-                    ]),
+                        KeyValueEntry::make('payment_info')
+                            ->columnSpanFull()
+                    ])
+                    ->columnSpanFull()
+                    ->collapsed(),
             ]);
     }
 }

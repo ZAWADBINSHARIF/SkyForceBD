@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TransactionStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +12,7 @@ class Transaction extends Model
     protected $fillable = [
         'order_id',
         'transaction_number',
+        'bank_transaction_id',
         'validation_id',
         'card_brand',
         'payment_method',
@@ -27,6 +29,7 @@ class Transaction extends Model
     ];
 
     protected $casts = [
+        'status'         => TransactionStatus::class,
         'payment_info'   => 'array',
         'payment_amount' => 'decimal:2',
         'store_amount'   => 'decimal:2',

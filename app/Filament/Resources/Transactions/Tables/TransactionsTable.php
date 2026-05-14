@@ -28,6 +28,12 @@ class TransactionsTable
                     ->copyable()
                     ->color('gray'),
 
+                TextColumn::make('bank_transaction_id')
+                    ->searchable()
+                    ->copyable()
+                    ->toggleable()
+                    ->color('gray'),
+
                 TextColumn::make('payment_method')
                     ->label('Method')
                     ->badge()
@@ -56,13 +62,7 @@ class TransactionsTable
 
                 TextColumn::make('status')
                     ->label('Status')
-                    ->badge()
-                    ->color(fn(string $state) => match ($state) {
-                        'pending'  => 'gray',
-                        'success'  => 'success',
-                        'failed'   => 'danger',
-                        'refunded' => 'warning',
-                    }),
+                    ->badge(),
 
                 ImageColumn::make('bank_transaction_image')
                     ->label('Proof')
@@ -93,6 +93,7 @@ class TransactionsTable
                         'cod'            => 'COD',
                     ]),
             ])
+            ->defaultSort('created_at', 'desc')
             ->recordActions([
                 EditAction::make(),
             ])

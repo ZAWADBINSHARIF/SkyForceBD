@@ -15,24 +15,24 @@ new class extends Component
             ? $state
             : 'success';
 
-        // if ($this->state === 'success') {
-        //     // Pull from session — SSLCommerz posts back tran_id and val_id
-        //     $tranId = session('sslcz_tran_id');
+        if ($this->state === 'success') {
+            // Pull from session — SSLCommerz posts back tran_id and val_id
+            $tranId = session('sslcz_tran_id');
 
-        //     if ($tranId) {
-        //         $transaction = Transaction::query()
-        //             ->where('transaction_number', $tranId)
-        //             ->with('order')
-        //             ->first();
+            if ($tranId) {
+                $transaction = Transaction::query()
+                    ->where('transaction_number', $tranId)
+                    ->with('order')
+                    ->first();
 
-        //         if ($transaction) {
-        //             $this->transactionNumber = $transaction->transaction_number;
-        //             $this->orderNumber       = $transaction->order?->order_number ?? '';
-        //         }
+                if ($transaction) {
+                    $this->transactionNumber = $transaction->transaction_number;
+                    $this->orderNumber       = $transaction->order?->order_number ?? '';
+                }
 
-        //         session()->forget('sslcz_tran_id');
-        //     }
-        // }
+                session()->forget('sslcz_tran_id');
+            }
+        }
     }
 
     public function goHome(): void
@@ -42,7 +42,7 @@ new class extends Component
 
     public function goOrders(): void
     {
-        $this->redirect(route('orders.index'), navigate: true);
+        $this->redirect(route('products'), navigate: true);
     }
 };
 ?>
@@ -62,7 +62,7 @@ new class extends Component
                 {{-- Icon --}}
                 <div class="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-5">
                     <svg class="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
 
@@ -132,7 +132,7 @@ new class extends Component
 
                 <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-5">
                     <svg class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
 
@@ -144,7 +144,7 @@ new class extends Component
                 <div class="bg-red-50 border border-red-100 rounded-xl px-4 py-3.5 mb-8 text-left">
                     <div class="flex items-start gap-3">
                         <svg class="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
                             <p class="text-xs font-semibold text-red-700 mb-0.5">What went wrong?</p>
@@ -182,7 +182,7 @@ new class extends Component
 
                 <div class="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-5">
                     <svg class="w-8 h-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
 
@@ -194,7 +194,7 @@ new class extends Component
                 <div class="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3.5 mb-8 text-left">
                     <div class="flex items-start gap-3">
                         <svg class="w-4 h-4 text-amber-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
                             <p class="text-xs font-semibold text-amber-700 mb-0.5">Changed your mind?</p>

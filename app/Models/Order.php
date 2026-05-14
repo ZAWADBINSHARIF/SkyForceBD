@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\DeliveryStatus;
+use App\Enums\OrderStatus;
+use App\Enums\ShipmentType;
+use App\Enums\WorkProcess;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,6 +17,7 @@ class Order extends Model
         'customer_id',
         'order_number',
         'order_receive_date',
+        'order_status',
         'delivery_status',
         'delivery_date',
         'products',
@@ -34,17 +39,21 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'products'           => 'array',
-        'order_receive_date' => 'datetime',
-        'order_place_date'   => 'datetime',
-        'delivery_date'      => 'date',
-        'total_price'        => 'decimal:2',
-        'shipping_charge'    => 'decimal:2',
-        'advance_payment'    => 'decimal:2',
-        'due_payment'        => 'decimal:2',
-        'product_weight'     => 'decimal:3',
-        'created_at'         => 'datetime',
-        'updated_at'         => 'datetime',
+        'products'              => 'array',
+        'order_status'          => OrderStatus::class,
+        'delivery_status'       => DeliveryStatus::class,
+        'work_process'          => WorkProcess::class,
+        'shipment_type'         => ShipmentType::class,
+        'order_receive_date'    => 'datetime',
+        'order_place_date'      => 'datetime',
+        'delivery_date'         => 'date',
+        'total_price'           => 'decimal:2',
+        'shipping_charge'       => 'decimal:2',
+        'advance_payment'       => 'decimal:2',
+        'due_payment'           => 'decimal:2',
+        'product_weight'        => 'decimal:3',
+        'created_at'            => 'datetime',
+        'updated_at'            => 'datetime',
     ];
 
     protected static function booted()
