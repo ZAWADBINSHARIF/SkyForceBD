@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Support\Facades\Storage;
 
+
+/** @property-read \Illuminate\Database\Eloquent\Collection $orders */
 class Customer extends Authenticatable implements AuthenticatableContract
 {
     protected $fillable = [

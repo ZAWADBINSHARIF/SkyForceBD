@@ -14,6 +14,11 @@ enum DeliveryStatus: string implements HasLabel, HasColor, HasIcon
     case Delivered  = 'delivered';
     case Cancelled  = 'cancelled';
 
+    public static function values(): array
+    {
+        return array_column(self::cases(), 'value', 'name');
+    }
+
     public function getLabel(): string
     {
         return match ($this) {

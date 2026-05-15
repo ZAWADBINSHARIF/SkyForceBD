@@ -122,6 +122,7 @@ class TransactionRelationManager extends RelationManager
                             ->label('Payment Amount (৳)')
                             ->numeric()
                             ->nullable()
+                            ->required()
                             ->minValue(0)
                             ->columnSpan(1),
 

@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use App\Models\Order;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
@@ -12,6 +13,10 @@ enum OrderStatus: string implements HasLabel, HasColor, HasIcon
     case Responsed    = 'responsed';
     case Accepted     = 'accepted';
     case Rejected     = 'rejected';
+
+    public static function values():array {
+        return array_column(self::cases(), 'value', 'name');
+    }
 
     public function getLabel(): string
     {

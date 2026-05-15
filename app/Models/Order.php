@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\PriceCast;
 use App\Enums\DeliveryStatus;
 use App\Enums\OrderStatus;
 use App\Enums\ShipmentType;
@@ -50,7 +51,7 @@ class Order extends Model
         'delivery_date'         => 'date',
         'total_price'           => 'decimal:2',
         'shipping_charge'       => 'decimal:2',
-        'advance_payment'       => 'decimal:2',
+        'advance_payment'       => PriceCast::class,
         'due_payment'           => 'decimal:2',
         'total_paid'            => 'decimal:2',
         'product_weight'        => 'decimal:3',
@@ -70,6 +71,59 @@ class Order extends Model
     public function getOrderNumberShortCodeAttribute(): string
     {
         return \Illuminate\Support\Str::afterLast($this->order_number, '-');
+    }
+
+    // ----------------------------
+    // ORDER STATUS HELPERS
+    // ----------------------------
+
+    public function isOrderRequest(): bool
+    {
+        return $this->order_status === OrderStatus::OrderRequest;
+    }
+
+    public function isResponded(): bool
+    {
+        return $this->order_status === OrderStatus::Responsed;
+    }
+
+    public function isAccepted(): bool
+    {
+        return $this->order_status === OrderStatus::Accepted;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->order_status === OrderStatus::Rejected;
+    }
+
+    // ----------------------------
+    // DELIVERY STATUS HELPERS
+    // ----------------------------
+
+    public function isPending(): bool
+    {
+        return $this->delivery_status === DeliveryStatus::Pending;
+    }
+
+    public function isProcessing(): bool
+    {
+        return $this->delivery_status === DeliveryStatus::Processing;
+    }
+
+    public function isShipped(): bool
+    {
+        return $this->delivery_status === DeliveryStatus::Shipped;
+    }
+
+    public function isDelivered(): bool
+    {
+        return $this->delivery_status === DeliveryStatus::Delivered;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->delivery_status === DeliveryStatus::Cancelled;
     }
 
     public function customer(): BelongsTo

@@ -78,7 +78,11 @@ class OrdersTable
                     ->toggleable(),
             ])
             ->filters([
-                SelectFilter::make('order_status')
+                SelectFilter::make('customer')
+                    ->relationship('customer', 'full_name')
+                    ->native(false),
+                
+                    SelectFilter::make('order_status')
                     ->options(OrderStatus::class)
                     ->native(false),
 

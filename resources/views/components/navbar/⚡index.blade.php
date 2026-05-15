@@ -37,7 +37,7 @@ new class extends Component
 };
 ?>
 
-<nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+<nav class="bg-white border-b border-gray-200 sticky top-0 z-60">
     <div class="container mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
         <div class="flex items-center gap-2">
             <a href="/" wire:navigate>

@@ -118,6 +118,7 @@ class TransactionForm
                             ->numeric()
                             ->nullable()
                             ->minValue(0)
+                            ->required()
                             ->columnSpan(1),
 
                         TextInput::make('store_amount')
