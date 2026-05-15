@@ -9,6 +9,13 @@ new class extends Component
     {
         return Product::latest()->take(10)->get();
     }
+
+    public function orderRequest(string $productURL)
+    {
+        $this->redirectRoute('order-request', [
+            'product_link' => $productURL,
+        ]);
+    }
 };
 ?>
 
@@ -32,8 +39,7 @@ new class extends Component
             <div class="relative aspect-square w-full overflow-hidden shrink-0" style="background: #f3f3f3">
 
                 @if ($product->product_images[0])
-                <img src="{{ $product->product_images[0] }}"
-                    alt="{{ $product->product_name }}"
+                <img src="{{ $product->product_images[0] }}" alt="{{ $product->product_name }}"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                 @endif
 
@@ -78,9 +84,9 @@ new class extends Component
 
                 <div class="flex gap-1.5 mt-auto">
 
-                    <button
+                    <button wire:click="orderRequest('{{ route('product', $product->slug) }}')"
                         class="flex-1 py-1.5 text-xs font-semibold text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors duration-200">
-                        Request
+                        Order Request
                     </button>
 
                     <a href="{{ route('product', $product->slug) }}"

@@ -35,6 +35,7 @@ class Order extends Model
         'shipping_charge',
         'product_weight',
         'advance_payment',
+        'total_paid',
         'due_payment',
     ];
 
@@ -51,6 +52,7 @@ class Order extends Model
         'shipping_charge'       => 'decimal:2',
         'advance_payment'       => 'decimal:2',
         'due_payment'           => 'decimal:2',
+        'total_paid'            => 'decimal:2',
         'product_weight'        => 'decimal:3',
         'created_at'            => 'datetime',
         'updated_at'            => 'datetime',

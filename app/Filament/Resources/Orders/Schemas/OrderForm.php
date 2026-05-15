@@ -16,6 +16,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Operation;
 
@@ -163,6 +165,22 @@ class OrderForm
                             ])
                             ->columns(7)
                             ->addActionLabel('+ Add Product')
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                $products = $state ?? [];
+                                $totalPaid = $get('total_paid');
+
+                                $totalPrice = collect($products)
+                                    ->sum(function ($product) {
+
+                                        return ((float) ($product['quantity'] ?? 0))
+                                            *
+                                            ((float) ($product['unit_price'] ?? 0));
+                                    });
+
+                                $set('total_price', $totalPrice + $get('shipping_charge'));
+                                $set('due_payment', $totalPrice + $get('shipping_charge') - $totalPaid);
+                            })
                             ->reorderable()
                             ->collapsible()
                             ->itemLabel(fn(array $state) => $state['name'] ?? 'New Product')
@@ -239,6 +257,13 @@ class OrderForm
                             ->required()
                             ->minValue(0)
                             ->default(0)
+                            ->readonly()
+                            ->live()
+                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                $totalPaid = $get('total_paid');
+
+                                $set('due_payment', $state - $totalPaid);
+                            })
                             ->columnSpan(1),
 
                         TextInput::make('shipping_charge')
@@ -247,6 +272,22 @@ class OrderForm
                             ->nullable()
                             ->minValue(0)
                             ->default(0)
+                            ->live()
+                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                $products = $get('products') ?? [];
+                                $totalPaid = $get('total_paid');
+
+                                $totalPrice = collect($products)
+                                    ->sum(function ($product) {
+
+                                        return ((float) ($product['quantity'] ?? 0))
+                                            *
+                                            ((float) ($product['unit_price'] ?? 0));
+                                    });
+
+                                $set('total_price', $totalPrice + $state);
+                                $set('due_payment', $totalPrice + $state - $totalPaid);
+                            })
                             ->columnSpan(1),
 
                         TextInput::make('product_weight')
@@ -265,12 +306,22 @@ class OrderForm
                             ->required()
                             ->columnSpan(1),
 
+                        TextInput::make('total_paid')
+                            ->label('Total Paid (৳)')
+                            ->numeric()
+                            ->nullable()
+                            ->readonly()
+                            ->minValue(0)
+                            ->default(0)
+                            ->columnSpan(1),
+
                         TextInput::make('due_payment')
                             ->label('Due Payment (৳)')
                             ->numeric()
                             ->nullable()
                             ->minValue(0)
                             ->default(0)
+                            ->readonly()
                             ->columnSpan(1),
                     ]),
             ]);

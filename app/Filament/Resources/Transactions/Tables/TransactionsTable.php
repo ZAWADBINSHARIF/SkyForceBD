@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Transactions\Tables;
 
+use App\Enums\TransactionStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -78,20 +79,7 @@ class TransactionsTable
             ])
             ->filters([
                 SelectFilter::make('status')
-                    ->options([
-                        'pending'  => 'Pending',
-                        'success'  => 'Success',
-                        'failed'   => 'Failed',
-                        'refunded' => 'Refunded',
-                    ]),
-
-                SelectFilter::make('payment_method')
-                    ->options([
-                        'card'           => 'Card',
-                        'mobile_banking' => 'Mobile Banking',
-                        'bank_transfer'  => 'Bank Transfer',
-                        'cod'            => 'COD',
-                    ]),
+                    ->options(TransactionStatus::class),
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([

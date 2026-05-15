@@ -35,6 +35,13 @@ new class extends Component
                         'price'    => 7000,
                         'quantity' => 245,
                     ],
+                    [
+                        'image'    => 'https://m.media-amazon.com/images/I/81f9bNVIUGL._AC_SL1500_.jpg',
+                        'name'     => 'Marvel Legends Series Daredevil: Born Again Daredevil & Jessica Jones, 2 Collectible 6-Inch Action Figures',
+                        'note'     => 'Can you tell me the price of 245 toys. With and without tex.',
+                        'price'    => 7000,
+                        'quantity' => 245,
+                    ],
                 ],
             ],
             [
