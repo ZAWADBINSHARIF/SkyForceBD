@@ -7,7 +7,6 @@ use App\Enums\StoragePath;
 use App\Models\AuthProvider;
 use App\Models\Customer;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Contracts\User as SocialUser;
 use Laravel\Socialite\Facades\Socialite;
@@ -73,7 +72,7 @@ class OAuthController extends Controller
         if (! $customer instanceof Customer) {
             $customer = Customer::create([
                 'full_name'     => $social->getName() ?? 'Unknown',
-                'email'         => $email ?? (string) Str::uuid(),
+                'email'         => $email,
                 'avatar_url'    => $this->storeAvatar($social->getAvatar(), $social->getId()),
                 'password_hash' => null,
             ]);

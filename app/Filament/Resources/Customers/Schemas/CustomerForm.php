@@ -3,9 +3,6 @@
 namespace App\Filament\Resources\Customers\Schemas;
 
 use App\Enums\FieldLength;
-use App\Enums\StoragePath;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -37,6 +34,12 @@ class CustomerForm
                             ->unique(ignoreRecord: true)
                             ->maxLength(FieldLength::Short->value)
                             ->placeholder('+8801XXXXXXXXX')
+                            ->columnSpan(1),
+
+                        TextInput::make('email')
+                            ->email()
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(FieldLength::Default->value)
                             ->columnSpan(1),
 
                         TextInput::make('address')

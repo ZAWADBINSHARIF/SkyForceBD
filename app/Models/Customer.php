@@ -49,10 +49,10 @@ class Customer extends Authenticatable implements AuthenticatableContract
     }
 
     // Tell Laravel to use password_hash column instead of password
-    // public function getAuthPassword(): string
-    // {
-    //     return $this->password_hash;
-    // }
+    public function getAuthPassword(): ?string
+    {
+        return $this->password_hash;
+    }
 
     public function authProviders(): HasMany
     {
