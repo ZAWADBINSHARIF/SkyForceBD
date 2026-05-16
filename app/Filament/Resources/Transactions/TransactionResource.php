@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Transactions;
 
 use App\Enums\NavigationGroup;
+use App\Enums\TransactionStatus;
 use App\Filament\Resources\Transactions\Pages\CreateTransaction;
 use App\Filament\Resources\Transactions\Pages\EditTransaction;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
@@ -24,7 +25,17 @@ class TransactionResource extends Resource
     protected static string|UnitEnum|null   $navigationGroup = NavigationGroup::Orders;
     protected static ?int                   $navigationSort  = 2;
 
-    protected static ?string $recordTitleAttribute = 'Transaction';
+    protected static ?string $recordTitleAttribute = 'transaction_number';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('status', TransactionStatus::Pending)->count();
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['transaction_number', 'bank_transaction_id'];
+    }
 
     public static function form(Schema $schema): Schema
     {

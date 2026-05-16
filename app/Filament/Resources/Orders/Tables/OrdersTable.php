@@ -10,6 +10,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\QueryBuilder\Constraints\DateConstraint;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
@@ -54,7 +55,12 @@ class OrdersTable
                 TextColumn::make('total_price')
                     ->label('Total (৳)')
                     ->money('BDT')
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(
+                        Sum::make()
+                            ->label('Revenue')
+                            ->money('BDT')
+                    ),
 
                 TextColumn::make('advance_payment')
                     ->label('Advance (৳)')
@@ -65,7 +71,22 @@ class OrdersTable
                     ->label('Due (৳)')
                     ->money('BDT')
                     ->color(fn($state) => $state > 0 ? 'danger' : 'success')
-                    ->toggleable(),
+                    ->toggleable()
+                    ->summarize(
+                        Sum::make()
+                            ->label('Total Due')
+                            ->money('BDT')
+                    ),
+
+                TextColumn::make('total_paid')
+                    ->label('Paid (৳)')
+                    ->money('BDT')
+                    ->sortable()
+                    ->summarize(
+                        Sum::make()
+                            ->label('Total Paid')
+                            ->money('BDT')
+                    ),
 
                 TextColumn::make('order_receive_date')
                     ->label('Received')

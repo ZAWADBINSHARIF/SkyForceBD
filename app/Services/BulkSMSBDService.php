@@ -18,6 +18,39 @@ class BulkSMSBDService
     }
 
     // ── Public API ────────────────────────────────────────────────
+    public function getBalance(): array
+    {
+        try {
+            $response = Http::asForm()
+                ->withOptions(['verify' => false])
+                ->timeout(15)
+                ->post('http://bulksmsbd.net/api/getBalanceApi', [
+                    'api_key' => $this->apiKey,
+                ]);
+
+            $body = $response->json();
+
+            Log::debug('BulkSMSBD balance response', $body ?? [
+                'raw' => $response->body(),
+            ]);
+
+            return [
+                'success' => $response->successful(),
+                'data' => $body,
+                'raw' => $response->body(),
+            ];
+        } catch (\Throwable $e) {
+
+            Log::error('BulkSMSBD balance request failed', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
 
     /**
      * Send the same message to one or many numbers.
@@ -29,7 +62,7 @@ class BulkSMSBDService
     public function send(array $numbers, string $message): BulkSMSBDResponse
     {
         $joined = implode(',', normalize_phone_numbers($numbers));
-        
+
         $payload = [
             'api_key'  => $this->apiKey,
             'senderid' => $this->senderId,

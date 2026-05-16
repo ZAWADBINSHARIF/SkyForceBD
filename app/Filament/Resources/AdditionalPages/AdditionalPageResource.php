@@ -24,8 +24,6 @@ class AdditionalPageResource extends Resource
     protected static string|UnitEnum|null   $navigationGroup = NavigationGroup::Website;
     protected static ?int                   $navigationSort  = 3;
 
-    protected static ?string $recordTitleAttribute = 'AdditionalPage';
-
     public static function form(Schema $schema): Schema
     {
         return AdditionalPageForm::configure($schema);

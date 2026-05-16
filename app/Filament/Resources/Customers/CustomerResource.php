@@ -24,8 +24,6 @@ class CustomerResource extends Resource
     protected static string|UnitEnum|null   $navigationGroup = NavigationGroup::UserManagement;
     protected static ?int                   $navigationSort  = 1;
 
-    protected static ?string $recordTitleAttribute = 'Customer';
-
     public static function form(Schema $schema): Schema
     {
         return CustomerForm::configure($schema);

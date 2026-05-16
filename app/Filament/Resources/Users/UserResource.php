@@ -26,8 +26,6 @@ class UserResource extends Resource
     protected static string|UnitEnum|null   $navigationGroup = NavigationGroup::UserManagement;
     protected static ?int                   $navigationSort  = 2;
 
-    protected static ?string $recordTitleAttribute = 'User';
-
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

@@ -190,17 +190,6 @@ new class extends Component
         $this->selectedMethod   = '';
     }
 
-    // public function closeModal(): void
-    // {
-    //     $this->showPaymentModal = false;
-    //     $this->selectedMethod   = '';
-    // }
-
-    // public function selectMethod(string $method): void
-    // {
-    //     $this->selectedMethod = $method;
-    // }
-
     public function handlePaymentSslCommerz(): void
     {
         if ($this->order_id === null) {
