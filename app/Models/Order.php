@@ -6,6 +6,7 @@ use App\Casts\PriceCast;
 use App\Enums\DeliveryStatus;
 use App\Enums\OrderStatus;
 use App\Enums\ShipmentType;
+use App\Enums\TransactionStatus;
 use App\Enums\WorkProcess;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -125,6 +126,68 @@ class Order extends Model
     {
         return $this->delivery_status === DeliveryStatus::Cancelled;
     }
+
+    // ----------------------------
+    // TRANSACTION STATUS HELPERS
+    // ----------------------------
+
+    /**
+     * Get the latest transaction for this order.
+     */
+    public function latestTransaction(): ?Transaction
+    {
+        return $this->transactions()
+            ->latest()
+            ->first();
+    }
+
+    public function isLatestTransactionStatusPending()
+    {
+        return $this->latestTransaction()?->status === TransactionStatus::Pending;
+    }
+
+    /**
+     * Get the latest successful transaction.
+     */
+    public function latestSuccessfulTransaction(): ?Transaction
+    {
+        return $this->transactions()
+            ->where('status', 'success')
+            ->latest()
+            ->first();
+    }
+
+    /**
+     * Check if any transaction is successful.
+     */
+    public function hasPaidSuccessfully(): bool
+    {
+        return $this->transactions()
+            ->where('status', 'success')
+            ->exists();
+    }
+
+    /**
+     * Check if there is a pending bank transfer waiting for verification.
+     */
+    public function hasPendingTransaction(): bool
+    {
+        return $this->transactions()
+            ->where('status', 'pending')
+            ->exists();
+    }
+
+    /**
+     * Check if all transactions have failed.
+     */
+    public function hasOnlyFailedTransactions(): bool
+    {
+        $total  = $this->transactions()->count();
+        $failed = $this->transactions()->where('status', 'failed')->count();
+
+        return $total > 0 && $total === $failed;
+    }
+
 
     public function customer(): BelongsTo
     {

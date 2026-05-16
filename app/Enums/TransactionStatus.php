@@ -11,6 +11,7 @@ enum TransactionStatus: string implements HasLabel, HasColor, HasIcon
     case Success  = 'success';
     case Failed   = 'failed';
     case Canceled = 'canceled';
+    case Pending  = 'pending';
 
     public function getLabel(): string
     {
@@ -18,6 +19,7 @@ enum TransactionStatus: string implements HasLabel, HasColor, HasIcon
             self::Success  => 'Success',
             self::Failed   => 'Failed',
             self::Canceled => 'Canceled',
+            self::Pending => 'Pending',
         };
     }
 
@@ -27,6 +29,7 @@ enum TransactionStatus: string implements HasLabel, HasColor, HasIcon
             self::Success  => 'success',
             self::Failed   => 'danger',
             self::Canceled => 'gray',
+            self::Pending => 'gray',
         };
     }
 
@@ -36,6 +39,7 @@ enum TransactionStatus: string implements HasLabel, HasColor, HasIcon
             self::Success  => 'heroicon-o-check-circle',
             self::Failed   => 'heroicon-o-x-circle',
             self::Canceled => 'heroicon-o-no-symbol',
+            self::Pending => 'heroicon-o-no-symbol',
         };
     }
 }
