@@ -32,7 +32,7 @@ new class extends Component
             'password' => $this->password,
         ];
 
-        if (Auth::guard('customer')->attempt($credentials)) {
+        if (Auth::guard('customer')->attempt($credentials, remember: true)) {
             $this->dispatch('close-auth-modal');
             $this->redirect(route('home'), navigate: true);
             return;

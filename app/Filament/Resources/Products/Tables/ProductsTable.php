@@ -56,6 +56,7 @@ class ProductsTable
                     ->label('Created')
                     ->date('d M Y')
                     ->sortable()
+                    ->timezone('Asia/Dhaka')
                     ->toggleable(),
             ])
             ->filters([

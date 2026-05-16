@@ -5,6 +5,7 @@ use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Traits\RequiresCustomerAuth;
 use App\Traits\WithSslCommerz;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -18,6 +19,23 @@ new class extends Component
 
     #[Url]
     public string $status = OrderStatus::OrderRequest->value;
+
+    public bool $showPaymentModal = false;
+    public string $selectedMethod = '';
+
+    public ?string $order_id;
+    public string $product_name = 'Advance Payment';
+    public string $product_category = 'Order lead accepted';
+    public string $product_profile = 'non-physical-goods';
+
+    public string $customerName;
+    public string $phoneNumber;
+    public string $email = 'info@skyforcebd.com';
+    public ?string $fullAddress = null;
+
+    public bool $shipping_method = false;
+
+    public string $amount;
 
     public array $tabs = [
         OrderStatus::OrderRequest->value => [
@@ -69,7 +87,7 @@ new class extends Component
     }
 
     #[Computed(persist: true, seconds: 180, cache: true)]
-    private function getOrders()
+    private function getOrders(): Collection
     {
         $attribute = $this->tabs[$this->status]['attribute'] ?? null;
 
@@ -82,10 +100,9 @@ new class extends Component
                     $query->where($attribute, $this->status);
                 })
                 ->get();
-            logger($orders->count());
             return $orders;
         } else {
-            return [];
+            return collect();
         }
     }
 
@@ -131,11 +148,64 @@ new class extends Component
         );
     }
 
+    public function openModal(): void
+    {
+        $this->showPaymentModal = true;
+        $this->selectedMethod   = '';
+    }
+
+    public function closeModal(): void
+    {
+        $this->showPaymentModal = false;
+        $this->selectedMethod   = '';
+    }
+
+    public function selectMethod(string $method): void
+    {
+        $this->selectedMethod = $method;
+    }
+
+    public function handlePaymentSslCommerz(): void
+    {
+        if ($this->order_id === null) {
+            return;
+        }
+
+        $order = Order::query()->find($this->order_id);
+
+        $this->product_name = 'Advance Payment';
+        $this->product_category = 'Order lead accepted';
+        $this->product_profile = 'non-physical-goods';
+
+        $this->customerName = $order->customer_name;
+        $this->phoneNumber = $order->customer_phone;
+        $this->shipping_method = false;
+
+        $this->amount = $order->advance_payment;
+
+        $this->setPostData();
+        $this->paymentForAdvance($this->order_id);
+    }
+
+    public function proceedPayment(): void
+    {
+        if (empty($this->selectedMethod)) {
+            return;
+        }
+
+        // TODO: handle each method
+        match ($this->selectedMethod) {
+            'bkash'       => $this->redirect(route('payment.bkash')),
+            'sslcommerz'  => $this->handlePaymentSslCommerz(),
+            'bank'        => $this->redirect(route('payment.bank')),
+            default       => null,
+        };
+    }
+
     public function render()
     {
         return $this->view([
             'orders' => $this->getOrders(),
-            // 'counts' => $counts,
         ]);
     }
 };
@@ -264,6 +334,10 @@ new class extends Component
                         Lead Total:
                         <span class="font-bold text-primary-500 ml-1">BDT {{ number_format($order['total_price'])
                             }}</span>
+                    <p class="text-xs text-gray-500">
+                        Paid:
+                        <span class="font-bold text-green-600 ml-1">BDT {{ number_format($order['total_paid'])
+                            }}</span>
                     </p>
 
                 </div>
@@ -271,13 +345,14 @@ new class extends Component
 
                 @if ($order->isResponded() && $order->isPending() && $order->advance_payment > 0)
 
-                <button
-                    wire:click="openTheOrderCancelConfirmationModal({{$order->id}})"
+                <button wire:click="openTheOrderCancelConfirmationModal({{$order->id}})"
                     class="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-lg transition-colors">
                     Cancel
                 </button>
                 <button
-                    class="px-3.5 py-1.5 bg-primary-500 hover:bg-primary-600 text-white text-xs font-semibold rounded-lg transition-colors">
+                    wire:click="$set('order_id', {{ $order->id }}); $set('amount', {{ $order->advance_payment }}); openModal()"
+                    class="px-3.5 py-1.5 bg-primary-500 hover:bg-primary-600 text-white text-xs font-semibold rounded-lg
+                    transition-colors">
                     Pay Advance ৳{{$order->advance_payment}}
                 </button>
                 @elseif ($order->isProcessing())
@@ -312,7 +387,7 @@ new class extends Component
 
         @endforeach
 
-        @empty($orders->toArray())
+        @if($orders->isEmpty())
         <div class="flex flex-col items-center justify-center py-24 text-center">
             <div class="w-12 h-12 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center mb-3">
                 @svg('heroicon-o-clipboard-document-list', 'w-6 h-6 text-gray-300')
@@ -320,8 +395,174 @@ new class extends Component
             <p class="text-sm font-semibold text-gray-600 mb-1">No orders here</p>
             <p class="text-xs text-gray-400 mb-5">Nothing with this status yet.</p>
         </div>
-        @endempty
-
+        @endif
 
     </div>
+
+    {{-- Modal --}}
+    @if ($showPaymentModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4" wire:click.self="closeModal">
+
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" wire:click="closeModal"></div>
+
+        {{-- Panel --}}
+        <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-xl z-10 overflow-hidden">
+
+            {{-- Header --}}
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900">Select Payment Method</h2>
+                    <p class="text-xs text-gray-400 mt-0.5">Total: <span
+                            class="font-semibold text-gray-700">৳{{$this->amount}}</span>
+                    </p>
+                </div>
+                <button wire:click="closeModal" type="button"
+                    class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Methods --}}
+            <div class="px-5 py-4 space-y-3">
+
+                {{-- bKash --}}
+                <button wire:click="selectMethod('bkash')" type="button" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all duration-150
+                        {{ $selectedMethod === 'bkash'
+                            ? 'border-pink-500 bg-pink-50'
+                            : 'border-gray-100 bg-gray-50 hover:border-gray-200 hover:bg-white' }}">
+
+                    {{-- bKash logo mark --}}
+                    <div class="w-14 h-14 rounded-xl bg-[#E2136E] flex items-center justify-center shrink-0">
+                        <span class="text-white font-black text-xs tracking-tight">bKash</span>
+                    </div>
+
+                    <div class="text-left flex-1">
+                        <p class="text-sm font-semibold text-gray-800">bKash</p>
+                        <p class="text-xs text-gray-400">Mobile banking · instant</p>
+                    </div>
+
+                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+                        {{ $selectedMethod === 'bkash' ? 'border-pink-500 bg-pink-500' : 'border-gray-300' }}">
+                        @if ($selectedMethod === 'bkash')
+                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        @endif
+                    </div>
+                </button>
+
+                {{-- SSLCommerz --}}
+                <button wire:click="selectMethod('sslcommerz')" type="button" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all duration-150
+                        {{ $selectedMethod === 'sslcommerz'
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-gray-100 bg-gray-50 hover:border-gray-200 hover:bg-white' }}">
+
+                    {{-- SSLCommerz logo mark --}}
+                    <div class="w-14 h-14 rounded-xl bg-[#0B5EA8] flex items-center justify-center shrink-0">
+                        <span class="text-white font-black text-[9px] leading-tight text-center">SSL<br>Commerz</span>
+                    </div>
+
+                    <div class="text-left flex-1">
+                        <p class="text-sm font-semibold text-gray-800">SSLCommerz</p>
+                        <p class="text-xs text-gray-400">Card · online bank · mobile bank</p>
+                        <div>
+                            <img src="{{asset('images/sslcommerz-we-accept.png')}}" />
+                        </div>
+                    </div>
+
+                    <div
+                        class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+                        {{ $selectedMethod === 'sslcommerz' ? 'border-primary-500 bg-primary-500' : 'border-gray-300' }}">
+                        @if ($selectedMethod === 'sslcommerz')
+                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        @endif
+                    </div>
+
+                </button>
+
+                {{-- Bank Transfer --}}
+                <button wire:click="selectMethod('bank')" type="button" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all duration-150
+                                    {{ $selectedMethod === 'bank'
+                                        ? 'border-emerald-500 bg-emerald-50'
+                                        : 'border-gray-100 bg-gray-50 hover:border-gray-200 hover:bg-white' }}">
+
+                    {{-- Bank icon --}}
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11M8 10v11M12 10v11M16 10v11" />
+                        </svg>
+                    </div>
+
+                    <div class="text-left flex-1">
+                        <p class="text-sm font-semibold text-gray-800">Bank Transfer</p>
+                        <p class="text-xs text-gray-400">Direct deposit · 1–2 business days</p>
+                    </div>
+
+                    <div
+                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+                                    {{ $selectedMethod === 'bank' ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300' }}">
+                        @if ($selectedMethod === 'bank')
+                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        @endif
+                    </div>
+                </button>
+
+
+            </div>
+
+            {{-- Footer --}}
+            <div class="px-5 pb-5">
+                <button wire:click="proceedPayment" type="button" @disabled(empty($selectedMethod)) class="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-150 flex items-center justify-center gap-2
+                        {{ !empty($selectedMethod)
+                            ? 'btn-primary'
+                            : 'bg-gray-100 text-gray-400 cursor-not-allowed' }}">
+                    <span wire:loading.remove wire:target="proceedPayment">
+                        @if (!empty($selectedMethod))
+                        Continue with
+                        {{ match($selectedMethod) {
+                        'bkash' => 'bKash',
+                        'sslcommerz' => 'SSLCommerz',
+                        'bank' => 'Bank Transfer',
+                        default => ''
+                        } }}
+                        @else
+                        Choose a method
+                        @endif
+                    </span>
+                    <span wire:loading wire:target="proceedPayment" class="flex items-center gap-2">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Redirecting...
+                    </span>
+                </button>
+
+                <p class="text-center text-xs text-gray-400 mt-3">
+                    <svg class="w-3 h-3 inline-block mb-0.5 mr-0.5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Secured & encrypted payment
+                </p>
+            </div>
+
+        </div>
+    </div>
+    @endif
+
 </div>

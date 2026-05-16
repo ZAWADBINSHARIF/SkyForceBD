@@ -36,6 +36,7 @@ class BannersTable
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->date('d M Y')
+                    ->timezone('Asia/Dhaka')
                     ->sortable()
                     ->toggleable(),
             ])

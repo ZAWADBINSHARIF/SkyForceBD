@@ -70,19 +70,21 @@ class OrdersTable
                 TextColumn::make('order_receive_date')
                     ->label('Received')
                     ->dateTime('d M Y')
+                    ->timezone('Asia/Dhaka')
                     ->sortable(),
 
                 TextColumn::make('delivery_date')
                     ->label('Delivery Date')
                     ->date('d M Y')
+                    ->timezone('Asia/Dhaka')
                     ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('customer')
                     ->relationship('customer', 'full_name')
                     ->native(false),
-                
-                    SelectFilter::make('order_status')
+
+                SelectFilter::make('order_status')
                     ->options(OrderStatus::class)
                     ->native(false),
 

@@ -1,11 +1,20 @@
 <?php
 
+use App\Models\Customer;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 new class extends Component
 {
+
+    public ?Customer $customer = null;
+
+    public function mount()
+    {
+        $this->customer = Auth::guard('customer')->user();
+    }
+
     public function goTo(string $name)
     {
         return redirect()->route($name);
@@ -79,7 +88,7 @@ new class extends Component
                     Request</button>
             </div>
 
-            @if (auth('customer')->check())
+            @if ($customer)
             <div class="items-center gap-2">
                 <button wire:click="goTo('orders')" class="btn md:hidden">
                     Orders
@@ -98,11 +107,11 @@ new class extends Component
             @endif
 
 
-            @auth('customer')
+            @if($customer)
             <div class="w-10 h-10 rounded-full bg-[#EEEDFE] flex items-center justify-center text-xs font-medium text-[#3C3489] cursor-pointer"
                 wire:click="$dispatch('open-profile-modal')">{{
-                strtoupper(substr(Auth::guard('customer')->user()->full_name, 0, 1)) }}</div>
-            @endauth
+                strtoupper(substr($customer->full_name, 0, 1)) }}</div>
+            @endif
 
         </div>
     </div>

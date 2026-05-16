@@ -10,10 +10,10 @@ new class extends Component
 
     public float $amount = 65;
 
-    public int $step = 3;
+    public int $step = 1;
     public int $totalSteps = 3;
 
-    public bool $showPaymentModal = true;
+    public bool $showPaymentModal = false;
     public string $selectedMethod = '';
 
     #[Url]
@@ -23,13 +23,10 @@ new class extends Component
     public array $products = [
         //
     ];
-    // public string $customerName = '';
-    // public string $phoneNumber = '';
-    // public string $additionalNote = '';
 
-    public string $customerName = 'Asif Ahemd';
-    public string $phoneNumber = '01732754990';
-    public string $additionalNote = 'Anything done';
+    public string $customerName = '';
+    public string $phoneNumber = '';
+    public string $additionalNote = '';
     public string $email = 'info@skyforcebd.com';
 
     public ?string $fullAddress = null;
@@ -40,8 +37,7 @@ new class extends Component
     public bool   $shipping_method = false;
 
     // Step 2
-    // public bool $agreedToTerms = false;
-    public bool $agreedToTerms = true;
+    public bool $agreedToTerms = false;
 
     public string $youtubeUrl = 'https://www.youtube.com/watch?v=txVwnBV4DEY';
 
@@ -56,13 +52,12 @@ new class extends Component
             ];
         } else {
             $this->products[] = [
-                'link' => "https://127.0.0.1:8000",
-                'quantity' => 2,
+                'link' => "",
+                'quantity' => 0,
             ];
         }
 
         $this->setPostData();
-        // dump($this->post_data);
     }
 
     protected function rules(): array
@@ -138,12 +133,6 @@ new class extends Component
 
     public function handlePaymentSslCommerz(): void
     {
-        // Handle payment logic here
-        // session()->flash('success', 'Order request submitted successfully!');
-        // $this->reset();
-        // $this->step = 1;
-        // $this->products = [['link' => '', 'quantity' => 1]];
-
         $this->setPostData();
         $this->paymentForOrderRequest();
     }

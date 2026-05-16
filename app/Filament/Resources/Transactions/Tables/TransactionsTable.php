@@ -75,6 +75,7 @@ class TransactionsTable
                     ->label('Date')
                     ->dateTime('d M Y, h:i A')
                     ->sortable()
+                    ->timezone('Asia/Dhaka')
                     ->toggleable(),
             ])
             ->filters([

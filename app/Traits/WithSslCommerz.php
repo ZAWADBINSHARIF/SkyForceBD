@@ -79,6 +79,30 @@ trait WithSslCommerz
         $this->post_data = $post_data;
     }
 
+    public function paymentForAdvance(string $order_id)
+    {
+        Transaction::create([
+            'order_id' => $order_id,
+            'transaction_number' => $this->post_data['tran_id'],
+            'payment_amount' => $this->post_data['total_amount']
+        ]);
+
+        $sslc = new SslCommerzNotification();
+        $payment_options = $sslc->makePayment($this->post_data, 'hosted');
+
+        if (!is_array($payment_options)) {
+            $payment_options = array();
+
+            Log::error('SSLCOMMERZ payment failed', ['response' => $payment_options]);
+
+            Log::error('SSLCOMMERZ payment failed', [
+                'response' => $payment_options,
+                'user_id' => Auth::guard('customer')->user()->id ?? null,
+                'post_data' => $this->post_data,
+            ]);
+        }
+    }
+
     public function paymentForOrderRequest()
     {
         $createdOrder = Order::create([
@@ -86,7 +110,6 @@ trait WithSslCommerz
             'products' => $this->products,
             'customer_name' => $this->customerName,
             'customer_phone' => $this->phoneNumber,
-            'customer_address' => $this->additionalNote,
             'customer_remark' => $this->additionalNote
         ]);
 

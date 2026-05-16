@@ -49,6 +49,7 @@ class UsersTable
                     ->label('Created')
                     ->dateTime('d M Y')
                     ->sortable()
+                    ->timezone('Asia/Dhaka')
                     ->toggleable(),
             ])
             ->filters([
