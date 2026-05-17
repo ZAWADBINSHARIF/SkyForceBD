@@ -3,11 +3,15 @@
 namespace App\Filament\Widgets;
 
 use App\Services\BulkSMSBDService;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class BulkSMSBDBalance extends StatsOverviewWidget
 {
+
+    use HasWidgetShield;
+
     protected function getStats(): array
     {
 

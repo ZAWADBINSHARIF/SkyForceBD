@@ -1,6 +1,10 @@
 <?php
 
 declare(strict_types=1);
+
+use App\Filament\Pages\SendSms;
+use App\Filament\Pages\SiteSetting;
+use App\Filament\Widgets\BulkSMSBDBalance;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -126,8 +130,18 @@ return [
         'merge' => true,
         'generate' => true,
         'methods' => [
-            'viewAny', 'view', 'create', 'update', 'delete', 'deleteAny', 'restore',
-            'forceDelete', 'forceDeleteAny', 'restoreAny', 'replicate', 'reorder',
+            'viewAny',
+            'view',
+            'create',
+            'update',
+            'delete',
+            'deleteAny',
+            'restore',
+            'forceDelete',
+            'forceDeleteAny',
+            'restoreAny',
+            'replicate',
+            'reorder',
         ],
         'single_parameter_methods' => [
             'viewAny',
@@ -198,6 +212,8 @@ return [
         'prefix' => 'view',
         'exclude' => [
             Dashboard::class,
+            // SiteSetting::class,
+            // SendSms::class
         ],
     ],
 
@@ -218,6 +234,7 @@ return [
         'exclude' => [
             AccountWidget::class,
             FilamentInfoWidget::class,
+            // BulkSMSBDBalance::class
         ],
     ],
 

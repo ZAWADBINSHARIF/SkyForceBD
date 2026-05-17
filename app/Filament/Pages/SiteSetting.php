@@ -12,6 +12,7 @@ use App\Models\Contact;
 use App\Models\Country;
 use App\Models\Office;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -31,6 +32,9 @@ use UnitEnum;
 
 class SiteSetting extends Page
 {
+
+    use HasPageShield;
+
     protected string $view = 'filament.pages.site-setting';
 
     protected static string|BackedEnum|null $navigationIcon  = Heroicon::OutlinedCog6Tooth;

@@ -7,6 +7,7 @@ use App\Enums\NavigationGroup;
 use App\Models\Customer;
 use App\Services\BulkSMSBDService;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
@@ -24,6 +25,9 @@ use UnitEnum;
 
 class SendSms extends Page
 {
+
+    use HasPageShield;
+
     protected string $view = 'filament.pages.send-sms';
 
     protected static string|BackedEnum|null $navigationIcon  = Heroicon::OutlinedChatBubbleLeftRight;
