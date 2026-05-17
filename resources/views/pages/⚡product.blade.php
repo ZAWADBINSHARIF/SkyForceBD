@@ -42,7 +42,7 @@ new class extends Component
             <span>/</span>
             <a href="#" class="hover:text-primary-500 transition-colors">{{ $product->category->name }}</a>
             <span>/</span>
-            <span class="text-gray-600 truncate max-w-xs">{{ $product->name }}</span>
+            <span class="text-gray-600 truncate max-w-xs">{{ $product->product_name }}</span>
         </nav>
 
         {{-- Product Top Section --}}
@@ -89,7 +89,8 @@ new class extends Component
 
                 {{-- Product Name + Wishlist --}}
                 <div class="flex items-start justify-between gap-4">
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">{{ $product->name }}</h1>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">{{ $product->product_name }}
+                    </h1>
 
                     {{-- Wishlist Button --}}
                     <button x-data="{ wished: false }" @click="wished = !wished"
