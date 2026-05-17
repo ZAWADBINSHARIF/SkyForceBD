@@ -26,6 +26,7 @@ use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Livewire\Attributes\Url;
 use UnitEnum;
 
 class SiteSetting extends Page
@@ -38,6 +39,7 @@ class SiteSetting extends Page
     protected static ?string                $navigationLabel = 'Website Settings';
     protected static ?string                $title           = 'Website Settings';
 
+    #[Url]
     public string $activeTab = 'contact';
 
     // ── One state bag per model ───────────────────────────────────
@@ -257,8 +259,8 @@ class SiteSetting extends Page
                                     Select::make('url')
                                         ->label('Linked Page')
                                         ->options(
-                                            fn() => AdditionalPage::query()->pluck('name', 'slug')
-                                                ->mapWithKeys(fn($name, $slug) => ["/{$slug}" => $name])
+                                            fn() => AdditionalPage::query()->where('published', true)->pluck('name', 'slug')
+                                                ->mapWithKeys(fn($name, $slug) => ["/page/{$slug}" => $name])
                                         )
                                         ->searchable()
                                         ->nullable()
@@ -507,7 +509,7 @@ class SiteSetting extends Page
         $this->notify('Countries saved.');
     }
 
-    
+
     // ── Helper ────────────────────────────────────────────────────
 
     private function notify(string $title): void
