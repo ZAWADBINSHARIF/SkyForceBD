@@ -20,7 +20,7 @@ class BannerForm
                 ->icon('heroicon-o-rectangle-stack')
                 ->columns(2)
                 ->schema([
-                    FileUpload::make('image_url')
+                    FileUpload::make('image')
                         ->label('Banner Image')
                         ->image()
                         ->disk('public')

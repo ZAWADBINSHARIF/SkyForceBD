@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class AdditionalPage extends Model
 {
-    protected $fillable = ['name', 'slug', 'content'];
+    protected $fillable = ['name', 'slug', 'content', 'published', 'add_on_footer'];
 
     protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'published'     => 'boolean',
+        'add_on_footer' => 'boolean',
+        'created_at'    => 'datetime',
+        'updated_at'    => 'datetime',
     ];
 }

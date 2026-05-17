@@ -42,6 +42,11 @@ new class extends Component
             'product_link' => $productURL,
         ]);
     }
+
+    public function viewProduct(string $slug)
+    {
+        redirect("/product/{$slug}");
+    }
 };
 ?>
 
@@ -106,11 +111,13 @@ new class extends Component
                     @foreach ($this->products() as $product)
 
                     <div
-                        class="bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-md hover:border-gray-300 transition-all flex flex-col">
+                        wire:click='viewProduct("{{$product->slug}}")'
+                        class="cursor-pointer bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-md hover:border-gray-300 transition-all flex flex-col">
 
                         {{-- Image --}}
                         <div class="aspect-square w-full overflow-hidden">
-                            <img src="{{ $product->product_images[0] }}" class="w-full h-full object-cover">
+                            <img src="{{ Storage::url($product->product_images[0]) }}"
+                                class="w-full h-full object-cover">
                         </div>
 
                         {{-- Info --}}

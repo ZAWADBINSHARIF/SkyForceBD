@@ -5,6 +5,7 @@ namespace App\Filament\Resources\AdditionalPages\Schemas;
 use App\Enums\FieldLength;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
@@ -35,12 +36,13 @@ class AdditionalPageForm
                         TextInput::make('slug')
                             ->label('Slug')
                             ->required()
+                            ->prefix('/page/')
                             ->unique(ignoreRecord: true)
                             ->maxLength(FieldLength::Default->value)
                             ->placeholder('e.g. privacy-policy')
                             ->helperText('Auto-generated from title.')
                             ->columnSpan(1),
-                    ]),
+                    ])->columnSpanFull(),
 
                 Section::make('Page Content')
                     ->description('Rich text content for this page.')
@@ -63,8 +65,13 @@ class AdditionalPageForm
                                 'undo',
                                 'redo',
                             ])
-                            ->columnSpanFull(),
-                    ]),
+                    ])->columnSpanFull(),
+
+                Section::make()
+                    ->schema([
+                        Toggle::make('published')->default(false),
+                        Toggle::make('add_on_footer')->default(false),
+                    ])->columns(2)
             ]);
     }
 }
