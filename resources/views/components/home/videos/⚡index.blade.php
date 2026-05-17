@@ -1,10 +1,19 @@
 <?php
 
+use App\Models\AdsVideo;
 use Livewire\Component;
 
 new class extends Component
 {
-    //
+    public array $vidoes = [];
+
+    public function mount()
+    {
+        $vidoes = AdsVideo::first();
+
+        if ($vidoes)
+            $this->vidoes = $vidoes->video;
+    }
 };
 ?>
 
@@ -27,12 +36,7 @@ new class extends Component
         return { id, type, thumb, link };
     },
 
-    videos: [
-        { url: 'https://www.youtube.com/watch?v=wuqvrEmreFU', title: 'How to request a custom product link' },
-        { url: 'https://www.youtube.com/watch?v=0WByFW1MvNc', title: 'Tracking your international shipments' },
-        { url: 'https://www.youtube.com/watch?v=8kG1-un2q5k', title: 'Tracking your international shipments' },
-        { url: 'https://www.facebook.com/reel/4289939724608774', title: 'Our Facebook Community Shopping Guide' }
-    ],
+    videos:@js($vidoes),
 
     scroll(dir) {
         const el = this.$refs.track;
@@ -90,6 +94,12 @@ new class extends Component
                                 </svg>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Video title -->
+                    <div class="mt-3 px-1">
+                        <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-primary-500 transition-colors"
+                            x-text="v.title"></h3>
                     </div>
 
                 </div>

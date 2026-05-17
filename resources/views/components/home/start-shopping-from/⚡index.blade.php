@@ -39,7 +39,7 @@ new class extends Component
 
                 <span
                     class="mt-4 text-xs md:text-sm font-bold text-gray-800 group-hover:text-primary-500 transition-colors"
-                    x-text="country.name"></span>
+                    >{{$country["name"]}}</span>
             </div>
         </a>
         @endif
