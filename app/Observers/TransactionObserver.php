@@ -14,13 +14,13 @@ class TransactionObserver
     public function created(Transaction $transaction): void
     {
         $this->syncPaidAmount($transaction->order_id);
-        }
-        
-        /**
-         * Handle the Transaction "updated" event.
-        */
-        public function updated(Transaction $transaction): void
-        {
+    }
+
+    /**
+     * Handle the Transaction "updated" event.
+     */
+    public function updated(Transaction $transaction): void
+    {
         $this->syncPaidAmount($transaction->order_id);
 
         // If order_id changed, recalculate the old order too

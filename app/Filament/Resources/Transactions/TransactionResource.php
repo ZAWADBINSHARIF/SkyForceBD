@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class TransactionResource extends Resource
@@ -34,7 +35,19 @@ class TransactionResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['transaction_number', 'bank_transaction_id'];
+        return ['order.order_number', 'transaction_number', 'bank_transaction_id'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Order Number' => $record->order->order_number,
+            'Customer Name' => $record->order->customer_name,
+            'Customer Phone' => $record->order->customer_phone,
+            'Order Status' => $record->order->order_status,
+            'Delivery Status' => $record->order->delivery_status,
+            'Transaction Status' => $record->status,
+        ];
     }
 
     public static function form(Schema $schema): Schema
