@@ -43,14 +43,10 @@ class UserForm
                             ->placeholder('+8801XXXXXXXXX')
                             ->columnSpan(1),
 
-                        Select::make('role')
+                        Select::make('roles')
                             ->label('Role')
+                            ->relationship('roles', 'name')
                             ->required()
-                            ->options([
-                                'admin'   => 'Admin',
-                                'manager' => 'Manager',
-                                'staff'   => 'Staff',
-                            ])
                             ->native(false)
                             ->columnSpan(1),
                     ]),

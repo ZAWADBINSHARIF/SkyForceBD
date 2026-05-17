@@ -1,4 +1,4 @@
-<x-filament::page>
+<x-filament-panels::page>
     <x-filament::tabs>
         <x-filament::tabs.item :active="$this->activeTab === 'contact'" wire:click="$set('activeTab', 'contact')"
             icon="heroicon-o-phone">
@@ -40,4 +40,4 @@
         {{ $this->adsVideoForm }}
         @endif
     </div>
-</x-filament::page>
+</x-filament-panels::page>
