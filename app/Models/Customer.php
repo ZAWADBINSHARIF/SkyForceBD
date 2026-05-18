@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -56,6 +57,51 @@ class Customer extends Authenticatable implements AuthenticatableContract
         return $this->password_hash;
     }
 
+    /**
+     * Check if a product is in the customer's wishlist.
+     */
+    public function hasWishlisted(int $productId): bool
+    {
+        return $this->wishlists()
+            ->where('product_id', $productId)
+            ->exists();
+    }
+
+    /**
+     * Add a product to wishlist. Safe to call multiple times.
+     */
+    public function addToWishlist(int $productId): void
+    {
+        $this->wishlists()->firstOrCreate([
+            'product_id' => $productId,
+        ]);
+    }
+
+    /**
+     * Remove a product from wishlist.
+     */
+    public function removeFromWishlist(int $productId): void
+    {
+        $this->wishlists()
+            ->where('product_id', $productId)
+            ->delete();
+    }
+
+    /**
+     * Toggle wishlist — add if not present, remove if present.
+     * Returns true if added, false if removed.
+     */
+    public function toggleWishlist(int $productId): bool
+    {
+        if ($this->hasWishlisted($productId)) {
+            $this->removeFromWishlist($productId);
+            return false;
+        }
+
+        $this->addToWishlist($productId);
+        return true;
+    }
+
     public function authProviders(): HasMany
     {
         return $this->hasMany(AuthProvider::class);
@@ -64,5 +110,16 @@ class Customer extends Authenticatable implements AuthenticatableContract
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function wishlistProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'wishlists')
+            ->withTimestamps();
     }
 }

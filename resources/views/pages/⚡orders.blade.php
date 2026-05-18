@@ -252,39 +252,6 @@ new class extends Component
         $this->bankStep = 1;
     }
 
-    // public function uploadBankProof(): void
-    // {
-    //     $this->validate([
-    //         'bankProofImagePath' => ['required', 'string'],
-    //     ], [
-    //         'bankProofImagePath.required' => 'Please upload a payment screenshot or receipt.',
-    //     ]);
-
-    //     if ($this->order_id === null) {
-    //         return;
-    //     }
-
-    //     $order = Order::query()->find($this->order_id);
-
-    //     if (! $order) {
-    //         return;
-    //     }
-
-    //     Transaction::create([
-    //         'order_id'               => $this->order_id,
-    //         'transaction_number'     => 'BANK-' . strtoupper(uniqid()),
-    //         'payment_method'         => 'bank_transfer',
-    //         'payment_amount'         => $order->advance_payment,
-    //         'status'                 => TransactionStatus::Canceled,
-    //         'bank_transaction_image' => $this->bankProofImagePath,
-    //         'payment_info'           => ['note' => 'Pending bank transfer verification'],
-    //     ]);
-
-    //     $this->closeModal();
-
-    //     $this->dispatch('notify', message: 'Payment submitted. We will verify and confirm shortly.');
-    // }
-
     public function uploadBankProof(): void
     {
         $this->validate([

@@ -1,27 +1,52 @@
 <?php
 
 use App\Models\Product;
+use App\Models\Customer;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 new class extends Component
 {
 
     public Product $product;
+    public bool $wishListed = false;
     public array $relatedProducts;
 
     public function mount(string $slug): void
     {
-        // Dummy product
+        /**
+         * @var Customer
+         */
+        $customer = Auth::guard('customer')->user();
+
         $this->product = Product::with('category')->where('slug', $slug)->first();
 
-        // Dummy related products
-        $this->relatedProducts = Product::query()
-            ->whereRelation('category', 'slug', $this->product->category?->slug)
-            ->whereKeyNot($this->product->id)
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->toArray();
+        if ($customer)
+            $this->wishListed = $customer->hasWishlisted($this->product->id);
+        else
+            $this->wishListed = false;
+
+        // $this->relatedProducts = Product::query()
+        //     ->whereRelation('category', 'slug', $this->product->category?->slug)
+        //     ->whereKeyNot($this->product->id)
+        //     ->latest()
+        //     ->limit(5)
+        //     ->get()
+        //     ->toArray();
+    }
+
+    // Toggle from any Livewire component
+    public function toggleWishlist(): void
+    {
+        /** @var Customer $customer */
+        $customer = Auth::guard('customer')->user();
+
+        if (! $customer) {
+            $this->dispatch('open-auth-modal');
+            return;
+        }
+
+        $this->wishListed = $customer->toggleWishlist($this->product->id);
     }
 
     public function orderRequest(string $productURL)
@@ -93,13 +118,18 @@ new class extends Component
                     </h1>
 
                     {{-- Wishlist Button --}}
-                    <button x-data="{ wished: false }" @click="wished = !wished"
-                        class="shrink-0 w-11 h-11 rounded-xl border-2 flex items-center justify-center transition-all duration-150"
-                        :class="wished ? 'border-primary-300 bg-primary-50' : 'border-gray-200 bg-white hover:border-primary-200'"
-                        title="Add to Wishlist">
-                        <svg class="w-5 h-5 transition-all duration-150"
-                            :class="wished ? 'fill-primary-500 stroke-primary-500' : 'fill-none stroke-gray-400'"
-                            stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <button wire:click="toggleWishlist"
+                        @class([ 'shrink-0 w-11 h-11 rounded-xl border-2 flex items-center justify-center transition-all duration-150'
+                        , 'border-primary-300 bg-primary-50'=> $this->wishListed,
+                        'border-gray-200 bg-white hover:border-primary-200' => ! $this->wishListed,
+                        ])
+                        >
+                        <svg @class([ 'w-5 h-5 transition-all duration-150' , 'fill-primary-500 stroke-primary-500'=> $this->wishListed,
+                            'fill-none stroke-gray-400' => ! $this->wishListed,
+                            ])
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            >
                             <path
                                 d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                         </svg>

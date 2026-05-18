@@ -24,6 +24,7 @@ new class extends Component
         $this->resetPage();
     }
 
+    #[Computed(persist: true, seconds: 2592000, cache: true)]
     public function products()
     {
         return Product::query()
