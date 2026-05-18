@@ -27,6 +27,7 @@ class BannerForm
                         ->directory(StoragePath::BannerImage->value)
                         ->maxSize(4096)
                         ->imageEditor()
+                        ->helperText('Right banner should use a 13/7 aspect ratio, and the left banner should use a 5/5.5 aspect ratio.')
                         ->required()
                         ->columnSpanFull(),
 
