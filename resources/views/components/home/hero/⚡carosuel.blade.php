@@ -12,7 +12,10 @@ new class extends Component
 
     public function mount(): void
     {
-        $this->banner = Banner::orderBy('sort_order', 'asc')->get();
+        $this->banner = Banner::orderBy('sort_order', 'asc')
+            ->get()
+            ->slice(0, -1)
+            ->values();
 
         // IMPORTANT: store only relative path (NOT asset())
         $this->slides = $this->banner->map(fn($b) => [
@@ -24,7 +27,7 @@ new class extends Component
 ?>
 
 <div x-show="@js($banner->isNotEmpty())"
-    class="md:col-span-4 rounded-2xl overflow-hidden relative bg-gray-200 h-48 md:h-112.5" x-data="{
+    class="md:col-span-4 rounded-2xl overflow-hidden relative bg-gray-200" x-data="{
         current: 0,
         slides: @js($slides),
         autoplay: null,
@@ -38,13 +41,15 @@ new class extends Component
         }
     }">
     <!-- Slides -->
-    <template x-for="(s, i) in slides" :key="i">
-        <a :href="s.link">
-            <img :src="`/storage/${s.image}`" :class="current === i ? 'opacity-100' : 'opacity-0'"
-                class="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-                :alt="'Slide ' + (i + 1)" />
-        </a>
-    </template>
+    <div class="relative w-full aspect-13/7 overflow-hidden">
+        <template x-for="(s, i) in slides" :key="i">
+            <a :href="s.link">
+                <img :src="`/storage/${s.image}`" :class="current === i ? 'opacity-100' : 'opacity-0'"
+                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+                    :alt="'Slide ' + (i + 1)" />
+            </a>
+        </template>
+    </div>
 
     <!-- Prev Button -->
     <button @click="current = (current - 1 + slides.length) % slides.length"
