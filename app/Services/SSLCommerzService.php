@@ -23,8 +23,8 @@ class SSLCommerzService
 
     public function __construct()
     {
-        $this->storeId       = config('sslcommerz.apiCredentials.store_id');
-        $this->storePassword = config('sslcommerz.apiCredentials.store_password');
+        $this->storeId       = config('sslcommerz.apiCredentials.store_id', '');
+        $this->storePassword = config('sslcommerz.apiCredentials.store_password', '');
         $this->validationUrl = config('sslcommerz.apiDomain') . config('sslcommerz.apiUrl.transaction_status');
     }
 
