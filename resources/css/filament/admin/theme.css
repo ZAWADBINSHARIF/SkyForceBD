@@ -1,0 +1,30 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@import "../../../../vendor/filament/filament/resources/css/theme.css";
+
+
+.fi-sidebar-item-label {
+    font-size: 12px;
+}
+
+.fi-sidebar-group-label {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.fi-sidebar-nav-groups {
+    row-gap: calc(var(--spacing) * 1);
+}
+
+.fi-sidebar-group-items {
+    row-gap: calc(var(--spacing) * 0);
+}
+
+.fi-sidebar-group {
+    row-gap: calc(var(--spacing) * 0);
+}
+
+
+.fi-main.fi-width-7xl {
+    @apply max-w-full;
+}

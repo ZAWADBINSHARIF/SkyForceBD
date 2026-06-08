@@ -5,7 +5,7 @@ use Livewire\Component;
 
 new class extends Component
 {
-    public Banner $banner;
+    public ?Banner $banner;
 
     public function mount()
     {

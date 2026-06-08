@@ -38,7 +38,7 @@ new class extends Component
             {{-- Image --}}
             <div class="relative aspect-square w-full overflow-hidden shrink-0" style="background: #f3f3f3">
 
-                @if ($product->product_images[0])
+                @if ($product->product_images[0] ?? null)
                 <img src="{{ Storage::url($product->product_images[0]) }}" alt="{{ $product->product_name }}"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                 @endif

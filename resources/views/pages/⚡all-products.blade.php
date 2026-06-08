@@ -116,10 +116,11 @@ new class extends Component
                         class="cursor-pointer bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-md hover:border-gray-300 transition-all flex flex-col">
 
                         {{-- Image --}}
-                        <div class="aspect-square w-full overflow-hidden">
-                            <img src="{{ Storage::url($product->product_images[0]) }}"
-                                class="w-full h-full object-cover">
-                        </div>
+                        @if ($product->product_images[0] ?? null)
+                            <div class="aspect-square w-full overflow-hidden">
+                                <img src="{{ Storage::url($product->product_images[0]) }}" class="w-full h-full object-cover">
+                            </div>
+                        @endif
 
                         {{-- Info --}}
                         <div class="p-2.5 flex flex-col flex-1">

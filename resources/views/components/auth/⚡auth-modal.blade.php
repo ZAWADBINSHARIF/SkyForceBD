@@ -40,7 +40,7 @@ new class extends Component
     <div wire:click="close" class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"></div>
 
     {{-- Modal shell --}}
-    <div wire:click="close" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         <div
             class="relative w-full sm:max-w-md bg-white rounded-2xl rounded-t-2xl shadow-2xl overflow-hidden max-h-[70dvh] overflow-y-auto">
 
