@@ -42,7 +42,7 @@ new class extends Component
 
     public function goOrders(): void
     {
-        $this->redirect(route('products'), navigate: true);
+        $this->redirect(route('orders'), navigate: true);
     }
 };
 ?>

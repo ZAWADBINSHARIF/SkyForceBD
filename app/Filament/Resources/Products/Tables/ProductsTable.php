@@ -22,7 +22,7 @@ class ProductsTable
                 ImageColumn::make('product_images')
                     ->label('Cover')
                     ->disk('public')
-                    ->getStateUsing(fn($record) => $record->product_images[0])
+                    ->getStateUsing(fn($record) => $record->product_images[0] ?? null)
                     ->square()
                     ->defaultImageUrl('https://placehold.co/80x80?text=No+Image'),
 

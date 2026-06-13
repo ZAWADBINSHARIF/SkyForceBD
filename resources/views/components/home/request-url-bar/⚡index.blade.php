@@ -15,10 +15,31 @@ new class extends Component
     }
 };
 ?>
+{{-- Animated border search bar --}}
 
 <div class="flex flex-col gap-2 py-8">
 
-    <div class="bg-white border border-gray-200 shadow-xl shadow-gray-200/40 rounded-2xl p-2 md:p-3">
+    <style>
+        @keyframes borderPulse {
+
+            0%,
+            100% {
+                border-color: #fe5265;
+                /* primary-500 */
+            }
+
+            50% {
+                border-color: #86868654;
+                /* primary-300 */
+            }
+        }
+
+        .animate-border-pulse {
+            animation: borderPulse 2s ease-in-out infinite;
+        }
+    </style>
+
+    <div class="bg-white border-2 shadow-xl shadow-gray-200/40 rounded-2xl p-2 md:p-3 animate-border-pulse">
         <div class="flex flex-wrap md:flex-nowrap items-center gap-3">
             <div class="flex-1 flex items-center gap-3 px-4">
                 <span class="p-2 bg-gray-100 rounded-full">
