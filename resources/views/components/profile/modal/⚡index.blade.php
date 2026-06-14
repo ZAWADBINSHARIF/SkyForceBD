@@ -61,6 +61,21 @@ new class extends Component
         $this->resetFeedback();
     }
 
+    public function openTheSignOutConfirmationModal(): void
+    {
+        $this->closeModal();
+
+        $this->dispatch(
+            'open-confirmation-modal',
+            title: 'Sign out',
+            message: 'Are you sure you want to sign out?',
+            callEvent: 'sign-out',
+            confirmText: 'Yes',
+            cancelText: 'No',
+            confirmColor: 'red',
+        );
+    }
+
     public function setTab(string $tab): void
     {
         $this->activeTab = $tab;
@@ -422,7 +437,12 @@ new class extends Component
 
                     {{-- Save button — hidden while OTP is pending --}}
                     @if (! $showOtpField)
-                    <div class="flex justify-end pt-1">
+                    <div class="flex justify-end pt-1 gap-3">
+
+                        <button type="button" wire:click="openTheSignOutConfirmationModal" class="btn">
+                            Sign Out
+                        </button>
+
                         <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary-500 text-white text-sm font-semibold
                                    hover:bg-primary-600 active:scale-95 transition-all
                                    disabled:opacity-60 disabled:cursor-not-allowed" wire:loading.attr="disabled"
@@ -543,7 +563,12 @@ new class extends Component
                         Password must be at least 6 characters.
                     </p>
 
-                    <div class="flex justify-end pt-1">
+                    <div class="flex justify-end pt-1 gap-3">
+
+                        <button type="button" wire:click="openTheSignOutConfirmationModal" class="btn">
+                            Sign Out
+                        </button>
+
                         <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary-500 text-white text-sm font-semibold
                                    hover:bg-primary-600 active:scale-95 transition-all
                                    disabled:opacity-60 disabled:cursor-not-allowed" wire:loading.attr="disabled"

@@ -17,100 +17,279 @@ new class extends Component
 };
 ?>
 
-<div class="pb-12" x-data="{
-    getVideoData(url) {
-        let id = '';
-
-        let thumb = '';
-        let link = url;
-
-        if (url.includes('youtube.com') || url.includes('youtu.be')) {
-            type = 'youtube';
-            id = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|\/v\/|embed\/))([^?& ]+)/)[1];
-            thumb = `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
-        } else if (url.includes('facebook.com') || url.includes('fb.watch')) {
-            type = 'facebook';
-            thumb = 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500&q=80';
+<div class="pb-12">
+    <style>
+        .vc-track::-webkit-scrollbar {
+            display: none;
         }
 
-        return { id, type, thumb, link };
-    },
+        .vc-card {
+            flex: 0 0 160px;
+            cursor: pointer;
+            border-radius: 12px;
+            background: #fff;
+            border: 0.5px solid #e5e7eb;
+            overflow: hidden;
+            will-change: flex-basis, opacity;
+            align-self: center;
+        }
 
-    videos:@js($vidoes),
+        .vc-thumb {
+            position: relative;
+            aspect-ratio: 16/9;
+            background: #f3f4f6;
+            overflow: hidden;
+        }
 
-    scroll(dir) {
-        const el = this.$refs.track;
-        const amount = el.clientWidth * 0.75;
-        el.scrollBy({ left: dir === 'right' ? amount : -amount, behavior: 'smooth' });
-    },
+        .vc-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
 
-    canScrollLeft: false,
-    canScrollRight: true,
+        .vc-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    updateScroll() {
-        const el = this.$refs.track;
-        this.canScrollLeft = el.scrollLeft > 0;
-        this.canScrollRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
-    }
-}">
-    <div class="relative">
+        .vc-play {
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.93);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-        <!-- Left button -->
-        <button x-show="canScrollLeft" @click="scroll('left')"
-            class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-9 h-9 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors">
-            <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-        </button>
+        .vc-info {
+            padding: 8px 10px 10px;
+            overflow: hidden;
+        }
 
-        <!-- Right button -->
-        <button x-show="canScrollRight" @click="scroll('right')"
-            class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-9 h-9 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors">
-            <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-        </button>
+        .vc-title {
+            font-weight: 500;
+            color: #6b7280;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+            margin: 0;
+        }
 
-        <!-- Scrollable track -->
-        <div x-ref="track" @scroll="updateScroll()" x-init="$nextTick(() => updateScroll())"
-            class="flex gap-6 overflow-x-auto scroll-smooth pb-2"
-            style="scrollbar-width: none; -ms-overflow-style: none;" onscroll="this.dispatchEvent(new Event('scroll'))">
+        .vc-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fff;
+            border: 0.5px solid #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            color: #6b7280;
+            transition: background 0.15s;
+            outline: none;
+        }
 
-            <template x-for="v in videos" :key="v.url">
-                <div x-data="{ info: getVideoData(v.url) }" @click="window.open(info.link, '_blank')"
-                    class="group cursor-pointer flex-none w-72">
+        .vc-nav:hover {
+            background: #f9fafb;
+        }
 
-                    <div
-                        class="relative aspect-video rounded-2xl overflow-hidden bg-gray-200 shadow-sm border border-gray-100">
-                        <img :src="info.thumb" :alt="v.title"
-                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+        @media (max-width: 640px) {
+            .vc-track {
+                height: 280px !important;
+            }
 
-                        <div
-                            class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                            <div
-                                class="w-12 h-12 rounded-full bg-white/90 shadow-xl flex items-center justify-center transform transition-transform duration-300 group-hover:scale-110">
-                                <svg class="w-6 h-6 text-primary-500 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M8 5v14l11-7z" />
-                                </svg>
+            .vc-nav {
+                display: none;
+            }
+        }
+    </style>
+
+    <div x-data="{
+            rawVideos: @js($vidoes),
+            REPS: 7,
+            BASE_W: 160,
+            BASE_FS: 11,    CTR_FS: 14,
+            BASE_PLAY: 32,  CTR_PLAY: 50,
+            BASE_PLAY_ICO: 13, CTR_PLAY_ICO: 20,
+            BASE_OPACITY: 1,
+            GAP: 14,
+
+            get videos() {
+                const out = [];
+                for (let i = 0; i < this.REPS; i++)
+                    for (const v of this.rawVideos) out.push(v);
+                return out;
+            },
+
+            getThumb(url) {
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|\/v\/|embed\/))([^?& ]+)/);
+                    return m ? `https://img.youtube.com/vi/${m[1]}/maxresdefault.jpg` : '';
+                }
+                return 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500&q=80';
+            },
+
+            lerp(a, b, t) { return a + (b - a) * t; },
+
+            isMobile() { return window.innerWidth <= 640; },
+
+            applyScales() {
+                const track = this.$refs.track;
+                const cards = Array.from(track.querySelectorAll('.vc-card'));
+                const trackRect = track.getBoundingClientRect();
+                const cx = trackRect.left + trackRect.width / 2;
+                const halfTrack = trackRect.width / 2;
+                const mobile = this.isMobile();
+
+                const centerW = mobile ? trackRect.width * 0.78 : 300;
+                const baseW   = mobile ? trackRect.width * 0.42 : this.BASE_W;
+
+                let closestIdx = 0, minDist = Infinity;
+
+                cards.forEach((card, i) => {
+                    const r = card.getBoundingClientRect();
+                    const cardCx = r.left + r.width / 2;
+                    const dist = Math.abs(cardCx - cx);
+                    if (dist < minDist) { minDist = dist; closestIdx = i; }
+
+                    const t = Math.max(0, 1 - dist / (halfTrack * 0.75));
+
+                    const w       = Math.round(this.lerp(baseW,               centerW,              t));
+                    const opacity = this.lerp(this.BASE_OPACITY, 1,            t);
+                    const fs      = this.lerp(this.BASE_FS,      this.CTR_FS,  t);
+                    const playW   = this.lerp(this.BASE_PLAY,    this.CTR_PLAY, t);
+                    const icoW    = this.lerp(this.BASE_PLAY_ICO, this.CTR_PLAY_ICO, t);
+                    const shadow  = t > 0.4
+                        ? `0 ${Math.round(t*8)}px ${Math.round(t*24)}px rgba(0,0,0,${(t*0.13).toFixed(2)})`
+                        : 'none';
+                    const borderC = t > 0.4
+                        ? `rgba(100,100,100,${(0.15 + t*0.25).toFixed(2)})`
+                        : '#e5e7eb';
+
+                    card.style.cssText = `
+                        flex: 0 0 ${w}px;
+                        opacity: ${opacity.toFixed(3)};
+                        box-shadow: ${shadow};
+                        border: 0.5px solid ${borderC};
+                        border-radius: 12px;
+                        cursor: pointer;
+                        overflow: hidden;
+                        background: #fff;
+                        align-self: center;
+                    `;
+
+                    const playEl = card.querySelector('.vc-play');
+                    if (playEl) {
+                        playEl.style.width  = playW.toFixed(1) + 'px';
+                        playEl.style.height = playW.toFixed(1) + 'px';
+                    }
+                    const icoEl = card.querySelector('.vc-play-ico');
+                    if (icoEl) {
+                        icoEl.setAttribute('width',  icoW.toFixed(1));
+                        icoEl.setAttribute('height', icoW.toFixed(1));
+                    }
+                    const titleEl = card.querySelector('.vc-title');
+                    if (titleEl) {
+                        titleEl.style.fontSize = fs.toFixed(2) + 'px';
+                        titleEl.style.color = t > 0.6 ? '#111827' : '#6b7280';
+                    }
+                });
+
+                const len = this.rawVideos.length;
+                const lo = len, hi = len * (this.REPS - 1);
+                if (closestIdx < lo || closestIdx >= hi) {
+                    const jumpCards = hi - lo;
+                    const approxW = this.BASE_W + this.GAP;
+                    if (closestIdx < lo) track.scrollLeft += jumpCards * approxW;
+                    else                 track.scrollLeft -= jumpCards * approxW;
+                }
+            },
+
+            findCenterIdx() {
+                const track = this.$refs.track;
+                const cards = Array.from(track.querySelectorAll('.vc-card'));
+                const cx = track.getBoundingClientRect().left + track.clientWidth / 2;
+                let minDist = Infinity, idx = 0;
+                cards.forEach((c, i) => {
+                    const r = c.getBoundingClientRect();
+                    const dist = Math.abs(r.left + r.width / 2 - cx);
+                    if (dist < minDist) { minDist = dist; idx = i; }
+                });
+                return idx;
+            },
+
+            scrollToCenterIdx(idx) {
+                const track = this.$refs.track;
+                const cards = Array.from(track.querySelectorAll('.vc-card'));
+                const card = cards[idx]; if (!card) return;
+                const trackRect = track.getBoundingClientRect();
+                const cardRect  = card.getBoundingClientRect();
+                const offset = cardRect.left - trackRect.left - (trackRect.width / 2) + (cardRect.width / 2);
+                track.scrollBy({ left: offset, behavior: 'smooth' });
+            },
+
+            prev() { this.scrollToCenterIdx(this.findCenterIdx() - 1); },
+            next() { this.scrollToCenterIdx(this.findCenterIdx() + 1); },
+
+            ticking: false,
+            onScroll() {
+                if (!this.ticking) {
+                    requestAnimationFrame(() => { this.applyScales(); this.ticking = false; });
+                    this.ticking = true;
+                }
+            },
+
+            init() {
+                this.$nextTick(() => {
+                    this.scrollToCenterIdx(this.rawVideos.length * 3);
+                    setTimeout(() => this.applyScales(), 80);
+                });
+            }
+        }">
+        <div class="relative" style="padding: 0 8px;">
+            <button @click="prev()" class="vc-nav" style="left: -14px;" aria-label="Previous">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <button @click="next()" class="vc-nav" style="right: -14px;" aria-label="Next">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+
+            <div x-ref="track" @scroll="onScroll()" class="vc-track flex items-center overflow-x-auto"
+                style="gap: 14px; height: 320px; padding: 0 12px; scrollbar-width: none; -ms-overflow-style: none;">
+                <template x-for="(v, i) in videos" :key="i">
+                    <div class="vc-card" @click="window.open(v.url, '_blank')">
+                        <div class="vc-thumb">
+                            <img :src="getThumb(v.url)" :alt="v.title" loading="lazy">
+                            <div class="vc-overlay">
+                                <div class="vc-play" style="width: 32px; height: 32px;">
+                                    <svg class="vc-play-ico" width="13" height="13" fill="#534AB7" viewBox="0 0 24 24"
+                                        style="margin-left: 2px;">
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                </div>
                             </div>
                         </div>
+                        <div class="vc-info">
+                            <p class="vc-title" style="font-size: 11px;" x-text="v.title"></p>
+                        </div>
                     </div>
-
-                    <!-- Video title -->
-                    <div class="mt-3 px-1">
-                        <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-primary-500 transition-colors"
-                            x-text="v.title"></h3>
-                    </div>
-
-                </div>
-            </template>
+                </template>
+            </div>
         </div>
-
     </div>
 </div>
-
-<style>
-    [x-ref="track"]::-webkit-scrollbar {
-        display: none;
-    }
-</style>

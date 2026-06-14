@@ -56,7 +56,4 @@ new class extends Component
             </button>
         </div>
     </div>
-
-    <livewire:home.request-url-bar.how-it-works />
-
 </div>

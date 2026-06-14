@@ -10,7 +10,7 @@ new class extends Component
 
     public float $amount = 65;
 
-    public int $step = 2;
+    public int $step = 1;
     public int $totalSteps = 3;
 
     public bool $showPaymentModal = false;

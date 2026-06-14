@@ -30,19 +30,6 @@ new class extends Component
 
         $this->redirect('/');
     }
-
-    public function openTheSignOutConfirmationModal(): void
-    {
-        $this->dispatch(
-            'open-confirmation-modal',
-            title: 'Sign out',
-            message: 'Are you sure you want to sign out?',
-            callEvent: 'sign-out',
-            confirmText: 'Yes',
-            cancelText: 'No',
-            confirmColor: 'red',
-        );
-    }
 };
 ?>
 
@@ -92,9 +79,6 @@ new class extends Component
             <div class="items-center gap-2">
                 <button wire:click="goTo('orders')" class="btn md:hidden">
                     Orders
-                </button>
-                <button wire:click="openTheSignOutConfirmationModal" class="btn">
-                    Sign Out
                 </button>
             </div>
             @else

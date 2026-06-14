@@ -26,6 +26,8 @@ new class extends Component
 
         <livewire:home.about-us />
 
+        <livewire:home.request-url-bar.how-it-works />
+
         <livewire:home.why-choose-us />
 
     </div>
