@@ -10,7 +10,7 @@ new class extends Component
 
     public float $amount = 65;
 
-    public int $step = 1;
+    public int $step = 2;
     public int $totalSteps = 3;
 
     public bool $showPaymentModal = false;
@@ -343,48 +343,65 @@ new class extends Component
 
         <div
             class="bg-gray-50 rounded-xl border border-gray-100 p-4 max-h-72 overflow-y-auto text-sm text-gray-600 space-y-3 leading-relaxed mb-4">
-            <p class="font-semibold text-gray-800">Please read carefully before proceeding</p>
+            <div class="prose text-sm text-gray-700">
 
-            <div>
-                <p class="font-medium text-gray-700 mb-1">1. Order Verification Fee</p>
-                <p>A non-refundable verification fee of <strong class="text-primary-600">65 BDT</strong> is charged per
-                    order request to confirm your intent and cover processing costs.</p>
-            </div>
+                <h3>অর্ডার রিকোয়েস্ট করার পরও কেন কোন রেসপন্স পাচ্ছি না?</h3>
 
-            <div>
-                <p class="font-medium text-gray-700 mb-1">2. Product Availability</p>
-                <p>We do not guarantee the availability of any product. If a product becomes unavailable, we will notify
-                    you and issue a full refund of the product cost.</p>
-            </div>
+                <ul>
+                    <li>১৮+ কোন প্রোডাক্ট হলে।</li>
+                    <li>কোন পণ্যের মূল্য ১০০০ টাকার এর নিচে এমন কোন প্রোডাক্ট দিয়ে অর্ডার রিকোয়েস্ট করলে।</li>
+                    <li>অ্যালকোহল জাতীয় কোন পণ্য হলে।</li>
+                    <li>৩০০ গ্রামের নিচের সাইজের ড্রোন।</li>
+                    <li>
+                        গোল্ড, ওয়াকিটকি, মিনি হিডেন ক্যামেরা, হাতকড়া, বন্দুক, অথবা কোন সামরিক ফোর্সের পোশাক,
+                        এ ধরনের কোন পণ্য অর্ডার রিকোয়েস্ট করলে কোন সময় রেসপন্স করা হবে না।
+                    </li>
+                </ul>
 
-            <div>
-                <p class="font-medium text-gray-700 mb-1">3. Pricing</p>
-                <p>Final product prices may vary due to exchange rates, shipping costs, or seller changes. You will be
-                    informed before any final charge is made.</p>
-            </div>
+                <p>
+                    এবং উল্লেখিত নিয়মাবলী না মেনে আপনি পরপর তিনবারের বেশি অর্ডার রিকোয়েস্ট করলে
+                    আপনার নাম্বার অটোমেটিক আমাদের ওয়েবসাইট থেকে ডিলিটেড হয়ে যাবে স্প্যাম অর্ডার
+                    রিকোয়েস্ট নাম্বার হিসেবে।
+                </p>
 
-            <div>
-                <p class="font-medium text-gray-700 mb-1">4. Delivery Timeline</p>
-                <p>Estimated delivery times are provided as a guide only. We are not liable for delays caused by
-                    customs, shipping carriers, or external factors.</p>
-            </div>
+                <p>
+                    সম্মানিত গ্রাহক আপনি যদি মনে করেন আপনার অর্ডার রিকোয়েস্ট করা পণ্যটি উল্লেখিত
+                    সকল নিয়মাবলী মেনে চলছে, তাহলে অর্ডার রিকোয়েস্ট সাবমিট বাটনে ক্লিক করুন।
+                </p>
 
-            <div>
-                <p class="font-medium text-gray-700 mb-1">5. Refund Policy</p>
-                <p>The 65 BDT verification fee is non-refundable under all circumstances. Product refunds are subject to
-                    seller policies and are handled on a case-by-case basis.</p>
-            </div>
+                <h3>
+                    সম্মানিত গ্রাহক আপনি অর্ডার রিকোয়েস্ট দেয়ার পর উল্লেখিত জিনিসগুলো আমাদের
+                    পারচেজ ম্যানেজার চেক করে দেখে আপনাকে ফোন কল এর রিপোর্ট দিবেন।
+                </h3>
 
-            <div>
-                <p class="font-medium text-gray-700 mb-1">6. Customer Responsibility</p>
-                <p>You are responsible for providing accurate product links, quantity, and contact details. Errors in
-                    these may result in wrong orders and we will not bear liability for such cases.</p>
-            </div>
+                <ol>
+                    <li>পণ্যটি কোন স্ক্যাম স্টোর থেকে অর্ডার করা হয়েছে কিনা।</li>
 
-            <div>
-                <p class="font-medium text-gray-700 mb-1">7. Communication</p>
-                <p>All order updates will be communicated via the phone number provided. Please ensure it is reachable
-                    via call or WhatsApp.</p>
+                    <li>
+                        প্ল্যাটফর্মে পোস্টকৃত পণ্য এবং সাপ্লায়ারের পণ্য একই কিনা।
+                    </li>
+
+                    <li>
+                        সাপ্লায়ার চায়নার ভিতর ডেলিভারি করবে কিনা। যদি ডেলিভারি না করে থাকে তাহলে
+                        একই প্রোডাক্টের ভিন্ন একজন সাপ্লায়ার এর কন্টাক্ট এড্রেস আপনাকে দিয়ে দেয়া হবে।
+                    </li>
+
+                    <li>
+                        প্রোডাক্টের নির্দিষ্ট খরচ কত পড়বে –
+                        <ul>
+                            <li>চায়নার ভিতরে ডেলিভারি</li>
+                            <li>রিকোয়েস্ট ফি</li>
+                            <li>শিপিং চার্জ</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <p>
+                    কোন পণ্য যদি আপনার নির্দিষ্ট লিংক থেকে না পাওয়া যায় অথবা সাপ্লায়ারের কাছে
+                    স্টক আউট হয়ে যায়, অথবা সাপ্লায়ার অতি ধীর গতির রেসপন্স দেয়, তাহলে আমাদের
+                    পারচেজ ম্যানেজার একই পণ্য অন্য সাপ্লায়ারের কাছ থেকে পারচেজ করতে বাধ্য থাকবেন।
+                </p>
+
             </div>
         </div>
 
@@ -394,8 +411,7 @@ new class extends Component
                     {{ $errors->has('agreedToTerms') ? 'border-red-200 bg-red-50' : 'border-gray-100 hover:bg-gray-50' }}">
             <input type="checkbox" wire:model="agreedToTerms" class="mt-0.5 w-4 h-4 accent-primary-500 shrink-0" />
             <span class="text-sm text-gray-700">
-                I have read and agree to the <span class="text-primary-600 font-medium">Terms & Conditions</span>.
-                I understand the verification fee is non-refundable.
+                আমি <span class="text-primary-600 font-medium">শর্তাবলী</span> পড়েছি এবং তাতে সম্মত আছি। আমি বুঝতে পারছি যে যাচাইকরণ ফি ফেরতযোগ্য নয়।
             </span>
         </label>
         @error('agreedToTerms')
