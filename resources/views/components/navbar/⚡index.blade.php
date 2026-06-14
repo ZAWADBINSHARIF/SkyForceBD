@@ -83,7 +83,7 @@ new class extends Component
 
         <div class="flex items-center gap-2">
 
-            <div class="hidden md:flex">
+            <div class="md:flex">
                 <button wire:click='goTo("order-request")' class="btn-primary">Order
                     Request</button>
             </div>
@@ -101,7 +101,7 @@ new class extends Component
             <div class="flex items-center gap-2">
                 <button wire:click="$dispatch('open-auth-modal', { mode: 'signin' })" class="btn">Sign
                     in</button>
-                <button wire:click="$dispatch('open-auth-modal', { mode: 'signup' })" class="btn">Sign
+                <button wire:click="$dispatch('open-auth-modal', { mode: 'signup' })" class="btn hidden md:flex">Sign
                     up</button>
             </div>
             @endif

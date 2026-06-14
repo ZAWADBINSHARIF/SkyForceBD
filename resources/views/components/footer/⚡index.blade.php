@@ -34,7 +34,7 @@ new class extends Component
         </div>
 
         {{-- Main Grid --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-8">
 
             {{-- Column 1: Company Info --}}
             <div class="flex flex-col gap-4">
@@ -127,7 +127,7 @@ new class extends Component
             </div>
 
             {{-- Column 4: Social + We Accept --}}
-            <div class="flex flex-col gap-6 col-start-4">
+            <div class="flex flex-col gap-6 lg:col-start-4">
 
                 {{-- Social Links --}}
                 @if ($contact?->facebook || $contact?->instagram || $contact?->youtube)
@@ -193,8 +193,7 @@ new class extends Component
         {{-- Bottom Bar --}}
         <div
             class="border-t border-gray-100 pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-center">
-            <p class="text-xs text-gray-400">© {{ date('Y') }} ShopLink. All rights reserved.</p>
-            <p class="text-xs text-gray-400">Made with care for our customers</p>
+            <p class="text-xs text-gray-400">© {{ date('Y') }} Sky Force BD. All rights reserved.</p>
         </div>
 
     </div>

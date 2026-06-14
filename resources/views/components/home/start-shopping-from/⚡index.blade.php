@@ -25,20 +25,20 @@ new class extends Component
         <p class="text-sm text-gray-500 mt-1">Get products delivered from your favorite global destinations</p>
     </div>
 
-    <div class="flex justify-center items-center gap-6 md:gap-10 flex-wrap">
+    <div class="flex justify-center items-center gap-4 md:gap-6 flex-wrap">
         @foreach ($countries as $country)
 
         @if ($country['code'])
         <a href="{{$country['url']}}">
             <div class="flex flex-col items-center group cursor-pointer">
                 <div
-                    class="relative w-24 h-16 md:w-32 md:h-20 overflow-hidden rounded-xl border border-gray-100 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:border-primary-500 group-hover:-translate-y-1.5">
+                    class="relative w-15 h-10 md:w-25 md:h-15 overflow-hidden rounded-lg border border-gray-100 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:border-primary-500 group-hover:-translate-y-1.5">
                     <img src="https://flagcdn.com/{{$country['code']}}.svg" alt="{{$country['code']}}"
                         class="w-full h-full object-cover">
                 </div>
 
                 <span
-                    class="mt-4 text-xs md:text-sm font-bold text-gray-800 group-hover:text-primary-500 transition-colors"
+                    class="mt-1 text-xs md:text-sm font-bold text-gray-800 group-hover:text-primary-500 transition-colors"
                     >{{$country["name"]}}</span>
             </div>
         </a>

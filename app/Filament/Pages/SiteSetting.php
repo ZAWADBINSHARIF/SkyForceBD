@@ -113,7 +113,7 @@ class SiteSetting extends Page
                         ->columns(2)
                         ->schema([
                             TextInput::make('email')->email()->nullable()->maxLength(FieldLength::Default->value)->columnSpan(1),
-                            TextInput::make('phone')->tel()->nullable()->maxLength(FieldLength::Short->value)->columnSpan(1),
+                            TextInput::make('phone')->nullable()->maxLength(FieldLength::Default->value)->columnSpan(1),
                             TextInput::make('whatsapp')->tel()->nullable()->maxLength(FieldLength::Short->value)->columnSpan(1),
                         ]),
 

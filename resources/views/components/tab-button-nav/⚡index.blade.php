@@ -1,10 +1,16 @@
 <?php
 
 use Livewire\Component;
+use App\Models\Contact;
 
 new class extends Component
 {
-    //
+    public ?Contact $contact = null;
+
+    public function mount(): void
+    {
+        $this->contact = Contact::first();
+    }
 };
 ?>
 
@@ -67,7 +73,7 @@ new class extends Component
             </a>
 
             {{-- Facebook Group --}}
-            <a href="YOUR_FB_GROUP_LINK" target="_blank"
+            <a href="{{$this->contact->facebook ?? 'https://www.facebook.com/SkyFS24'}}" target="_blank"
                 class="flex flex-col items-center justify-center flex-1 gap-1 text-gray-400">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                     <path
@@ -77,7 +83,7 @@ new class extends Component
             </a>
 
             {{-- WhatsApp --}}
-            <a href="https://wa.me/YOUR_NUMBER" target="_blank"
+            <a href="{{$this->contact->whatsapp ?? 'https://wa.me/+8801725254949'}}" target="_blank"
                 class="flex flex-col items-center justify-center flex-1 gap-1 text-gray-400">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                     <path
