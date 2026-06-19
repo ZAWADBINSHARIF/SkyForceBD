@@ -46,6 +46,12 @@ class Transaction extends Model
 
     protected static function booted(): void
     {
+        static::creating(function (Transaction $transaction) {
+            if (!$transaction->transaction_number) {
+                $transaction->transaction_number = uniqid("TXID-");
+            }
+        });
+
         // If the bank transaction image is replaced, delete the old file.
         static::updating(function (Transaction $transaction) {
             if ($transaction->isDirty('bank_transaction_image')) {
