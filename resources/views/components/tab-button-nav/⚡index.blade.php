@@ -83,7 +83,7 @@ new class extends Component
             </a>
 
             {{-- WhatsApp --}}
-            <a href="{{$this->contact->whatsapp ?? 'https://wa.me/+8801925250404'}}" target="_blank"
+            <a href="https://wa.me/{{$this->contact->whatsapp ?? '+8801925250404'}}" target="_blank"
                 class="flex flex-col items-center justify-center flex-1 gap-1 text-gray-400">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                     <path
