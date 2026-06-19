@@ -379,8 +379,8 @@ new class extends Component
                     // Active if matches current status
                     $isActive = ($currentOrderStatus === $badge['value']);
                     // Completed if index is less than current (and we are not rejected)
-                    $isPast = ($currentOrderIndex !== false && $badgeIndex < $currentOrderIndex) && !$isRejected; // In
-                        rejected case, only show Request as filled (completed) if ($isRejected) {
+                    $isPast = ($currentOrderIndex !== false && $badgeIndex < $currentOrderIndex) && !$isRejected; // In rejected case, only show Request as filled (completed) 
+                    if ($isRejected) {
                         $isActive=($badge['value']==='order_request' ); $isPast=false; } @endphp <span
                         class="inline-flex items-center gap-1">
                         <span
@@ -492,125 +492,6 @@ new class extends Component
             </div>
 
         </div>
-
-        {{-- old design. --}}
-        <div class="border border-gray-100 rounded-xl overflow-hidden">
-
-            {{-- Order ID bar --}}
-            <div class="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-100">
-                <span class="text-xs font-bold text-gray-500 tracking-widest uppercase font-mono">
-                    #{{ $order->order_number_short_code }}
-                </span>
-                <button class="px-3 py-1 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-md
-                                        hover:bg-gray-700 transition-colors">
-                    Checkout
-                </button>
-            </div>
-
-            {{-- Products --}}
-            @foreach ($order['products'] as $product)
-            <div class="flex gap-3 px-4 py-4 border-b border-gray-50">
-
-                {{-- Info --}}
-                <div class="flex-1 min-w-0 flex items-start justify-between gap-3">
-
-                    <div class="flex-1 min-w-0">
-
-                        <p class="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">
-                            {{ $product['name'] ?? 'Unnamed' }}
-                        </p>
-
-                        @if (!empty($product['link']))
-                        <a href="{{ $product['link'] }}" target="_blank" rel="noopener noreferrer"
-                            class="text-xs text-primary-500 hover:underline break-all line-clamp-2">
-                            {{ $product['link'] }}
-                        </a>
-                        @endif
-
-                    </div>
-
-                    {{-- Price --}}
-                    @if (
-                    isset($product['unit_price']) &&
-                    isset($product['total_price']) &&
-                    isset($product['quantity'])
-                    )
-                    <div class="shrink-0 text-right">
-                        <p class="text-xs font-bold text-primary-500 whitespace-nowrap">
-                            BDT {{ number_format((float) $product['unit_price']) }}
-                            ×
-                            {{ number_format((float) $product['quantity']) }}
-                            =
-                            {{ number_format((float) $product['total_price']) }}
-                        </p>
-                    </div>
-                    @endif
-
-                </div>
-
-            </div>
-            @endforeach
-
-            <div class="px-2">
-                @if ($order['customer_remark'])
-                <p class="text-xs text-gray-500 mt-1 line-clamp-1">
-                    Note: {{ $order['customer_remark'] }}
-                </p>
-                @endif
-            </div>
-
-            {{-- Footer --}}
-            <div class="px-4 py-3 flex items-center justify-end gap-3">
-                <div>
-
-                </div>
-                @if ($order->isOrderRequest())
-                <div class="flex flex-col items-end">
-
-                    <p class="text-xs text-gray-500">
-                        <span class="font-bold text-primary-500 ml-1">Inquiring...</span>
-                    </p>
-
-                </div>
-                @else
-                <div class="flex flex-col items-end">
-
-                    <p class="text-xs text-gray-500">
-                        Shipping charage:
-                        <span class="font-bold text-primary-500 ml-1">BDT {{ number_format($order['shipping_charge'])
-                            }}</span>
-                    </p>
-                    <p class="text-xs text-gray-500">
-                        Lead Total:
-                        <span class="font-bold text-primary-500 ml-1">BDT {{ number_format($order['total_price'])
-                            }}</span>
-                    <p class="text-xs text-gray-500">
-                        Paid:
-                        <span class="font-bold text-green-600 ml-1">BDT {{ number_format($order['total_paid'])
-                            }}</span>
-                    </p>
-
-                </div>
-                @endif
-
-                @if ($order->isResponded() && $order->isPending() && $order->advance_payment > 0 &&
-                !$order->isLatestTransactionStatusPending())
-
-                <button wire:click="openTheOrderCancelConfirmationModal({{$order->id}})"
-                    class="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-lg transition-colors">
-                    Cancel
-                </button>
-                <button
-                    wire:click="$set('order_id', {{ $order->id }}); $set('amount', {{ $order->advance_payment }}); openModal()"
-                    class="px-3.5 py-1.5 bg-primary-500 hover:bg-primary-600 text-white text-xs font-semibold rounded-lg
-                    transition-colors">
-                    Pay Advance ৳{{$order->advance_payment}}
-                </button>
-                @endif
-            </div>
-
-        </div>
-
 
 
         @endforeach
