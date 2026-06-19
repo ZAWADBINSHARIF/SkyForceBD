@@ -569,7 +569,7 @@ new class extends Component
         <div class="px-5 py-4 space-y-3">
 
             {{-- bKash --}}
-            <button wire:click="selectMethod('bkash')" type="button" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all duration-150
+            <button x-show='false' wire:click="selectMethod('bkash')" type="button" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all duration-150
                     {{ $selectedMethod === 'bkash'
                         ? 'border-pink-500 bg-pink-50'
                         : 'border-gray-100 bg-gray-50 hover:border-gray-200 hover:bg-white' }}">

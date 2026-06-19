@@ -379,8 +379,8 @@ new class extends Component
                     // Active if matches current status
                     $isActive = ($currentOrderStatus === $badge['value']);
                     // Completed if index is less than current (and we are not rejected)
-                    $isPast = ($currentOrderIndex !== false && $badgeIndex < $currentOrderIndex) && !$isRejected; // In rejected case, only show Request as filled (completed) 
-                        if ($isRejected) {
+                    $isPast = ($currentOrderIndex !== false && $badgeIndex < $currentOrderIndex) && !$isRejected; // In
+                        rejected case, only show Request as filled (completed) if ($isRejected) {
                         $isActive=($badge['value']==='order_request' ); $isPast=false; } @endphp <span
                         class="inline-flex items-center gap-1">
                         <span
@@ -457,7 +457,8 @@ new class extends Component
                     <div class="flex flex-col items-end">
                         <p class="text-xs text-gray-500">
                             Shipping charge:
-                            <span class="font-bold text-primary-500 ml-1">BDT {{ number_format($order['shipping_charge'])
+                            <span class="font-bold text-primary-500 ml-1">BDT {{
+                                number_format($order['shipping_charge'])
                                 }}</span>
                         </p>
                         <p class="text-xs text-gray-500">
@@ -467,7 +468,8 @@ new class extends Component
                         </p>
                         <p class="text-xs text-gray-500">
                             Paid:
-                            <span class="font-bold text-green-600 ml-1">BDT {{ number_format($order['total_paid']) }}</span>
+                            <span class="font-bold text-green-600 ml-1">BDT {{ number_format($order['total_paid'])
+                                }}</span>
                         </p>
                     </div>
                     @endif
@@ -560,7 +562,7 @@ new class extends Component
             {{-- Footer --}}
             <div class="px-4 py-3 flex items-center justify-end gap-3">
                 <div>
-                    
+
                 </div>
                 @if ($order->isOrderRequest())
                 <div class="flex flex-col items-end">
@@ -656,7 +658,7 @@ new class extends Component
             <div class="overflow-y-auto overscroll-contain flex-1 px-5 py-4 space-y-3">
 
                 {{-- bKash --}}
-                <button wire:click="selectMethod('bkash')" type="button" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all duration-150
+                <button x-show='false' wire:click="selectMethod('bkash')" type="button" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all duration-150
                     {{ $selectedMethod === 'bkash'
                         ? 'border-pink-500 bg-pink-50'
                         : 'border-gray-100 bg-gray-50 hover:border-gray-200 hover:bg-white' }}">
