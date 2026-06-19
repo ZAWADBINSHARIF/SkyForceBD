@@ -47,7 +47,6 @@ class CustomersTable
                 TextColumn::make('created_at')
                     ->label('Joined')
                     ->dateTime('d M Y')
-                    ->timezone('Asia/Dhaka')
                     ->sortable()
                     ->toggleable(),
             ])

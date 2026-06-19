@@ -34,13 +34,11 @@ class AdditionalPagesTable
                 TextColumn::make('updated_at')
                     ->label('Last Updated')
                     ->dateTime('d M Y, h:i A')
-                    ->timezone('Asia/Dhaka')
                     ->sortable(),
 
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->date('d M Y')
-                    ->timezone('Asia/Dhaka')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
