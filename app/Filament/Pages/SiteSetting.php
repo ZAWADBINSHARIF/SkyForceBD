@@ -114,7 +114,16 @@ class SiteSetting extends Page
                         ->schema([
                             TextInput::make('email')->email()->nullable()->maxLength(FieldLength::Default->value)->columnSpan(1),
                             TextInput::make('phone')->nullable()->maxLength(FieldLength::Default->value)->columnSpan(1),
-                            TextInput::make('whatsapp')->tel()->nullable()->maxLength(FieldLength::Short->value)->columnSpan(1),
+                            TextInput::make('whatsapp')
+                                ->tel()
+                                ->nullable()
+                                ->rule('regex:/^\+8801[3-9]\d{8}$/')
+                                ->validationMessages([
+                                    'required' => 'Phone number is required.',
+                                    'regex' => 'Phone number must be a valid Bangladeshi mobile number starting with +88 (e.g., +8801712345678).',
+                                ])
+                                ->maxLength(FieldLength::Short->value)
+                                ->columnSpan(1),
                         ]),
 
                     Section::make('Social Media')
