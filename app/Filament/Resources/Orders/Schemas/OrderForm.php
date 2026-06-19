@@ -46,14 +46,12 @@ class OrderForm
                         DateTimePicker::make('order_receive_date')
                             ->label('Received At')
                             ->required()
-                            ->timezone('Asia/Dhaka')
                             ->default(now()->timezone('Asia/Dhaka'))
                             ->columnSpan(1),
 
                         DateTimePicker::make('order_place_date')
                             ->label('Order Placed At')
                             ->nullable()
-                            ->timezone('Asia/Dhaka')
                             ->helperText('Set when advance payment is confirmed.')
                             ->columnSpan(1),
                     ])->columnSpanFull(),
