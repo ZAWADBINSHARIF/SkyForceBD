@@ -208,6 +208,7 @@ class TransactionRelationManager extends RelationManager
                 TextColumn::make('created_at')
                     ->label('Date')
                     ->dateTime('d M Y, h:i A')
+                    ->timezone('Asia/Dhaka')
                     ->sortable()
                     ->toggleable(),
             ])

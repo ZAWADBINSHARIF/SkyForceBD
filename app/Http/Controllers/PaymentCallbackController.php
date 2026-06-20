@@ -58,7 +58,7 @@ class PaymentCallbackController extends Controller
                 $order->update([
                     'order_status'    => OrderStatus::OrderRequest,
                     'delivery_status' => DeliveryStatus::Pending,
-                    'order_receive_date' => now()->timezone('Asia/Dhaka')
+                    'order_receive_date' => now()
                 ]);
             } elseif (
                 $order->order_status    === OrderStatus::Responsed &&
@@ -67,7 +67,7 @@ class PaymentCallbackController extends Controller
                 $order->update([
                     'order_status'    => OrderStatus::Accepted,
                     'delivery_status' => DeliveryStatus::Processing,
-                    'order_place_date' => now()->timezone('Asia/Dhaka')
+                    'order_place_date' => now()
                 ]);
             }
         }

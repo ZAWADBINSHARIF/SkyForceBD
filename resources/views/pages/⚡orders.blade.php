@@ -84,6 +84,7 @@ new class extends Component
         if ($customer) {
             $orders = $customer->orders()
                 ->with('transactions')
+                ->orderBy('created_at', 'desc')
                 ->get();
             return $orders;
         } else {

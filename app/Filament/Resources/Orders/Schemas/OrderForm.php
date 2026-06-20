@@ -46,8 +46,8 @@ class OrderForm
                         DateTimePicker::make('order_receive_date')
                             ->label('Received At')
                             ->required()
+                            ->hiddenOn('create')
                             ->timezone('Asia/Dhaka')
-                            ->default(now())
                             ->columnSpan(1),
 
                         DateTimePicker::make('order_place_date')

@@ -122,7 +122,7 @@ class SendSms extends Page
                                         ->whereNotNull('phone_number')
                                         ->where(function ($q) use ($search, $normalizedSearch) {
 
-                                            $q->where('full_name', 'ilike', "%{$search}%")
+                                            $q->where('full_name', 'like', "%{$search}%")
                                                 ->orWhere('phone_number', 'like', "%{$search}%")
                                                 ->orWhere('phone_number', 'like', "%{$normalizedSearch}%");
                                         })
