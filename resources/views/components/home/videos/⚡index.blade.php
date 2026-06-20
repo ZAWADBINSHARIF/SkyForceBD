@@ -17,7 +17,7 @@ new class extends Component
 };
 ?>
 
-<div class="pb-12">
+<div class="pb-0">
     <style>
         .vc-track::-webkit-scrollbar {
             display: none;

@@ -236,7 +236,7 @@ new class extends Component
             @foreach ($products as $i => $product)
             <div class="rounded-xl border border-gray-100 bg-gray-50 p-3">
                 <div class="flex items-center justify-between mb-2.5">
-                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Product {{ $i + 1
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Product link {{ $i + 1
                         }}</span>
                     @if (count($products) > 1)
                     <button wire:click="removeProduct({{ $i }})" type="button"
@@ -262,7 +262,7 @@ new class extends Component
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-gray-500 shrink-0">Qty</span>
+                        <span class="text-xs text-gray-500 shrink-0">Quantity</span>
                         <input type="number" wire:model.blur="products.{{ $i }}.quantity" min="1" placeholder="1"
                             class="w-24 px-3 py-2 text-sm bg-white border rounded-lg outline-none transition-colors
                                             {{ $errors->has('products.'.$i.'.quantity') ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-primary-400' }}" />
@@ -411,7 +411,8 @@ new class extends Component
                     {{ $errors->has('agreedToTerms') ? 'border-red-200 bg-red-50' : 'border-gray-100 hover:bg-gray-50' }}">
             <input type="checkbox" wire:model="agreedToTerms" class="mt-0.5 w-4 h-4 accent-primary-500 shrink-0" />
             <span class="text-sm text-gray-700">
-                আমি <span class="text-primary-600 font-medium">শর্তাবলী</span> পড়েছি এবং তাতে সম্মত আছি। আমি বুঝতে পারছি যে যাচাইকরণ ফি ফেরতযোগ্য নয়।
+                আমি <span class="text-primary-600 font-medium">শর্তাবলী</span> পড়েছি এবং তাতে সম্মত আছি। আমি বুঝতে
+                পারছি যে যাচাইকরণ ফি ফেরতযোগ্য নয়।
             </span>
         </label>
         @error('agreedToTerms')

@@ -39,7 +39,7 @@ new class extends Component
         }
     </style>
 
-    <div class="bg-white border-2 shadow-xl shadow-gray-200/40 rounded-2xl p-2 md:p-3 animate-border-pulse mb-10">
+    <div class="bg-white border-2 shadow-xl shadow-gray-200/40 rounded-2xl p-2 md:p-3 animate-border-pulse">
         <div class="flex flex-wrap md:flex-nowrap items-center gap-3">
             <div class="flex-1 flex items-center gap-3 px-4">
                 <span class="p-2 bg-gray-100 rounded-full">

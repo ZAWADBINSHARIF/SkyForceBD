@@ -19,7 +19,7 @@ new class extends Component
 };
 ?>
 
-<div class="pb-10">
+<div class="pb-0">
     <div class="text-center mb-10">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900">Start Shopping From</h2>
         <p class="text-sm text-gray-500 mt-1">Get products delivered from your favorite global destinations</p>
