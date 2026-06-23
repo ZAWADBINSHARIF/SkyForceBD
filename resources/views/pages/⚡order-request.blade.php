@@ -67,7 +67,7 @@ new class extends Component
             'products.*.link'      => 'required|url',
             'products.*.quantity'  => 'required|integer|min:1',
             'customerName'         => 'required|string|min:3',
-            'phoneNumber'          => 'required|string|regex:/^[0-9+\-\s]{7,15}$/',
+            'phoneNumber'          => 'required|string|regex:/^[0-9+\-\s]{7,15}$/|max:11',
             'additionalNote'       => 'nullable|string|max:500',
         ];
     }
