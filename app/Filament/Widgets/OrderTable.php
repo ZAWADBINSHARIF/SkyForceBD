@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\Orders\Tables;
+namespace App\Filament\Widgets;
 
 use App\Enums\DeliveryStatus;
 use App\Enums\OrderStatus;
 use App\Enums\ShipmentType;
 use App\Enums\WorkProcess;
+use App\Models\Order;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -16,12 +18,21 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Widgets\TableWidget;
+use Illuminate\Database\Eloquent\Builder;
 
-class OrdersTable
+class OrderTable extends TableWidget
 {
-    public static function configure(Table $table): Table
+    use HasWidgetShield;
+
+    protected int | string | array $columnSpan = 'full';
+
+    protected static ?int $sort = 4;
+
+    public function table(Table $table): Table
     {
         return $table
+            ->query(fn(): Builder => Order::query())
             ->columns([
                 TextColumn::make('order_number')
                     ->label('Order #')
@@ -131,7 +142,7 @@ class OrdersTable
                             ->label("Order Receive Date"),
                     ]),
 
-            ], layout: FiltersLayout::AboveContent)
+            ])
             ->recordActions([
                 EditAction::make(),
             ])

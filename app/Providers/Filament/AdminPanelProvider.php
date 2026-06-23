@@ -20,6 +20,11 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Enums\NavigationGroup;
+use App\Filament\Widgets\BulkSMSBDBalance;
+use App\Filament\Widgets\OrderChart;
+use App\Filament\Widgets\OrderTable;
+use App\Filament\Widgets\TotalTransactionAmount;
+use App\Filament\Widgets\TransactionChart;
 use Filament\Navigation\NavigationGroup as FilamentNavigationGroup;
 
 class AdminPanelProvider extends PanelProvider
@@ -45,8 +50,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
-                // FilamentInfoWidget::class,
+                TotalTransactionAmount::class,
+                BulkSMSBDBalance::class,
+                OrderChart::class,
+                TransactionChart::class,
+                OrderTable::class
             ])
             ->middleware([
                 EncryptCookies::class,

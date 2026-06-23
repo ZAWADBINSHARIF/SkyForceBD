@@ -12,6 +12,12 @@ class BulkSMSBDBalance extends StatsOverviewWidget
 
     use HasWidgetShield;
 
+    protected static ?int $sort = 2;
+
+    protected int|array|null $columns = 1;
+
+    protected int | string | array $columnSpan = 1;
+
     protected function getStats(): array
     {
 
@@ -28,7 +34,7 @@ class BulkSMSBDBalance extends StatsOverviewWidget
         }
 
         return [
-            Stat::make('SMS Balance', (string) $balance . " TK")
+            Stat::make('SMS Balance', (string) "৳ ". $balance)
                 ->description(
                     $balance > 500
                         ? 'Sufficient SMS balance'
