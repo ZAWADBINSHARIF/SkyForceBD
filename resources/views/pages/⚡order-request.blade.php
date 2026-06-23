@@ -302,7 +302,7 @@ new class extends Component
                 <label class="block text-xs font-semibold text-gray-600 mb-1.5">
                     Phone Number <span class="text-red-400">*</span>
                 </label>
-                <input type="tel" wire:model.blur="phoneNumber" placeholder="+880 1XXXXXXXXX"
+                <input type="tel" wire:model.blur="phoneNumber" placeholder="017XXXXXXXX"
                     class="w-full px-3 py-2 text-sm border rounded-lg outline-none transition-colors placeholder:text-gray-300
                                 {{ $errors->has('phoneNumber') ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-primary-400' }}" />
                 @error('phoneNumber')
