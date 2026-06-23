@@ -7,6 +7,7 @@ use App\Enums\OrderStatus;
 use App\Library\SslCommerz\SslCommerzNotification;
 use App\Models\Order;
 use App\Models\Transaction;
+use App\Services\BulkSMSBDService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -124,6 +125,10 @@ trait WithSslCommerz
 
         if (!is_array($payment_options)) {
             $payment_options = array();
+
+            $sms = app(BulkSMSBDService::class);
+
+            $sms->send([$createdOrder->customer_phone], "Thank you for requesting order on our website. Order id: #{$createdOrder->order_number_short_code}. Our agent will call you soon.");
 
             Log::error('SSLCOMMERZ payment failed', ['response' => $payment_options]);
 

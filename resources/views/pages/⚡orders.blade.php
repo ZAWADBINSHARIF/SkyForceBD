@@ -77,19 +77,27 @@ new class extends Component
     #[Computed(persist: true, seconds: 180, cache: true)]
     private function getOrders(): Collection
     {
-
         /** @var \App\Models\Customer $customer */
         $customer = Auth::guard('customer')->user();
 
-        if ($customer) {
-            $orders = $customer->orders()
-                ->with('transactions')
-                ->orderBy('created_at', 'desc')
-                ->get();
-            return $orders;
-        } else {
+        if (! $customer) {
             return collect();
         }
+
+        $orders = Order::query()
+            ->with('transactions')
+            ->where(function ($query) use ($customer) {
+                $query
+                    ->where('customer_id', $customer->id)
+                    ->orWhere(function ($query) use ($customer) {
+                        $query->whereNull('customer_id')
+                            ->where('customer_phone', $customer->phone_number);
+                    });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return $orders;
     }
 
     public function getStatusCount(string $attribute, string $value): int
@@ -108,11 +116,6 @@ new class extends Component
         Order::where('id', $order_id)->update([
             'order_status' => OrderStatus::Rejected->value,
         ]);
-    }
-
-    public function setStatus(string $status): void
-    {
-        $this->status = $status;
     }
 
     public function updatedStatus()
@@ -380,8 +383,8 @@ new class extends Component
                     // Active if matches current status
                     $isActive = ($currentOrderStatus === $badge['value']);
                     // Completed if index is less than current (and we are not rejected)
-                    $isPast = ($currentOrderIndex !== false && $badgeIndex < $currentOrderIndex) && !$isRejected; // In rejected case, only show Request as filled (completed) 
-                    if ($isRejected) {
+                    $isPast = ($currentOrderIndex !== false && $badgeIndex < $currentOrderIndex) && !$isRejected; // In rejected case, only show Request as filled (completed)
+                        if ($isRejected) {
                         $isActive=($badge['value']==='order_request' ); $isPast=false; } @endphp <span
                         class="inline-flex items-center gap-1">
                         <span

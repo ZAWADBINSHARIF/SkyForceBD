@@ -50,6 +50,7 @@ class CustomersTable
                     ->sortable()
                     ->toggleable(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])

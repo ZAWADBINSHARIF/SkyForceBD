@@ -11,6 +11,8 @@ class OrderMessageTemplates
     public static function all(): array
     {
         return [
+            'order_request' => 'Thank you for requesting order on our website. Order id: #{order_number}. Our agent will call you soon.',
+
             'confirmed' => 'Order Confirmed: Your order #{order_number} has been confirmed. We will start processing it. Total amount: {total_price} BDT.',
 
             'china_received' => 'China Warehouse Update: Your order #{order_number} has arrived at China warehouse. We are preparing shipment.',
@@ -37,7 +39,7 @@ class OrderMessageTemplates
             : '-';
 
         $products = collect($order->products ?? [])
-            ->map(fn($p) => $p['name']? $p['name'] . ' x' . $p['quantity']: '')
+            ->map(fn($p) => $p['name'] ? $p['name'] . ' x' . $p['quantity'] : '')
             ->implode(', ');
 
         return str_replace(
