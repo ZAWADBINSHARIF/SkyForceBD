@@ -6,11 +6,13 @@ use App\Enums\DeliveryStatus;
 use App\Enums\OrderStatus;
 use App\Enums\ShipmentType;
 use App\Enums\WorkProcess;
+use App\Filament\Resources\Orders\OrderResource;
 use App\Models\Order;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\QueryBuilder\Constraints\DateConstraint;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
@@ -33,6 +35,7 @@ class OrderTable extends TableWidget
     {
         return $table
             ->query(fn(): Builder => Order::query())
+            ->recordUrl(fn($record) => OrderResource::getUrl('edit', ['record' => $record]))
             ->columns([
                 TextColumn::make('order_number')
                     ->label('Order #')
@@ -144,7 +147,8 @@ class OrderTable extends TableWidget
 
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->url(fn($record) => OrderResource::getUrl('edit', ['record' => $record])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
