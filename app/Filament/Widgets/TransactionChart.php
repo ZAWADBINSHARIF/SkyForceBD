@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\TransactionStatus;
 use App\Models\Transaction;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\ChartWidget;
@@ -48,6 +49,7 @@ class TransactionChart extends ChartWidget
 
         $transactions = Transaction::query()
             ->whereYear('created_at', $year)
+            ->where('status', TransactionStatus::Success)
             ->get()
             ->groupBy(fn(Transaction $transaction) => $transaction->created_at->month);
 
