@@ -10,16 +10,16 @@
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
 
-    --color-primary-50: #fff1f2;
-    --color-primary-100: #ffe4e6;
-    --color-primary-200: #fecdd3;
-    --color-primary-300: #fda4af;
-    --color-primary-400: #fb7185;
-    --color-primary-500: #fe5265;
-    --color-primary-600: #e64558;
-    --color-primary-700: #cc3d4e;
-    --color-primary-800: #b33544;
-    --color-primary-900: #992d3a;
+    --color-primary-50: #fff1f3;
+    --color-primary-100: #ffe2e8;
+    --color-primary-200: #fec3d1;
+    --color-primary-300: #fb98ab;
+    --color-primary-400: #f56a7f;
+    --color-primary-500: #ea3f64;
+    --color-primary-600: #c72c53;
+    --color-primary-700: #9d2747;
+    --color-primary-800: #74213a;
+    --color-primary-900: #4c1527;
 
     --animate-fab-ping: fab-ping 2s ease-out infinite;
     --animate-fab-pulse: fab-pulse 2s ease-in-out infinite;
@@ -31,7 +31,7 @@
 }
 
 .btn-primary {
-    @apply px-3 py-1.5 text-sm text-white bg-primary-500 rounded-lg hover:bg-primary-600 transition-colors;
+    @apply px-3 font-bold py-1.5 text-sm text-white bg-primary-500 rounded-lg hover:bg-primary-600 transition-colors;
 }
 
 @keyframes fab-ping {

@@ -51,7 +51,7 @@ new class extends Component
             </div>
 
             <button wire:click="orderRequest"
-                class="w-full md:w-auto shrink-0 text-sm font-semibold text-white bg-primary-500 hover:bg-primary-600 px-10 py-3 rounded-xl transition-all shadow-md active:scale-95">
+                class="w-full md:w-auto shrink-0 text-lg font-bold text-white bg-primary-500 hover:bg-primary-600 px-10 py-3 rounded-xl transition-all shadow-md active:scale-95">
                 Order Request
             </button>
         </div>
