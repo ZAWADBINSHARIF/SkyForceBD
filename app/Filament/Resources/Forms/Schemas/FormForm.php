@@ -139,6 +139,20 @@ class FormForm
                             ->rule('regex:/^[a-zA-Z0-9_]+$/')
                             ->maxLength(100),
 
+                        TextInput::make('step')
+                            ->label('Step')
+                            ->helperText('Optional step name for multi-step public forms')
+                            ->columnSpan(2),
+
+                        Select::make('column_span')
+                            ->label('Column span')
+                            ->options([
+                                'full' => 'Full width',
+                                2 => 'Half width',
+                            ])
+                            ->default('full')
+                            ->helperText('Choose how much horizontal space this field occupies on the public form'),
+
                         TextInput::make('placeholder')
                             ->visible(fn(Get $get) => FieldType::tryFrom($get('type') ?? '')?->isInput() ?? true),
 
@@ -147,6 +161,34 @@ class FormForm
                             ->rows(2)
                             ->columnSpanFull()
                             ->visible(fn(Get $get) => FieldType::tryFrom($get('type') ?? '')?->isInput() ?? true),
+
+                        Textarea::make('validation_rules')
+                            ->label('Validation rules')
+                            ->helperText('Enter Laravel validation rules separated by pipes, e.g. required|max:255')
+                            ->columnSpanFull()
+                            ->visible(fn(Get $get) => FieldType::tryFrom($get('type') ?? '')?->isInput() ?? true),
+
+                        TextInput::make('warning_text')
+                            ->label('Warning text')
+                            ->columnSpanFull(),
+
+                        Select::make('warning_status')
+                            ->label('Warning color')
+                            ->options([
+                                'warning' => 'Warning',
+                                'danger' => 'Danger',
+                                'info' => 'Info',
+                                'success' => 'Success',
+                            ])
+                            ->default('warning')
+                            ->visible(fn(Get $get) => filled($get('warning_text')))
+                            ->columnSpan(2),
+
+                        Textarea::make('description')
+                            ->label('Section description')
+                            ->rows(2)
+                            ->columnSpanFull()
+                            ->visible(fn(Get $get) => ($get('type') ?? '') === FieldType::Section->value),
 
                         Toggle::make('required')
                             ->label('Required by default')

@@ -13,8 +13,12 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
+use Illuminate\Support\HtmlString;
 
 class FormSchemaBuilder
 {
@@ -27,14 +31,40 @@ class FormSchemaBuilder
      */
     public static function build(array $definitions): array
     {
-        $components = [];
+        $definitions = array_values($definitions);
 
-        foreach ($definitions as $definition) {
-            $component = static::buildSingle($definition, $definitions);
+        if (collect($definitions)->contains(fn(array $definition) => filled($definition['step'] ?? null))) {
+            $steps = collect($definitions)
+                ->groupBy(fn(array $definition) => $definition['step'] ?? 'General')
+                ->map(function (\Illuminate\Support\Collection $fields, string $stepLabel) use ($definitions) {
+                    return Step::make($stepLabel ?: 'General')
+                        ->schema($fields->flatMap(fn(array $definition) => static::buildSingleComponents($definition, $definitions))->all());
+                })
+                ->values()
+                ->all();
 
-            if ($component !== null) {
-                $components[] = $component;
-            }
+            return [Wizard::make($steps)->startOnStep(1)];
+        }
+
+        return collect($definitions)
+            ->flatMap(fn(array $definition) => static::buildSingleComponents($definition, $definitions))
+            ->all();
+    }
+
+    protected static function buildSingleComponents(array $definition, array $allDefinitions): array
+    {
+        $component = static::buildSingle($definition, $allDefinitions);
+
+        if (! $component) {
+            return [];
+        }
+
+        $components = [$component];
+
+        if (! empty($definition['warning_text'])) {
+            $components[] = Callout::make()
+                ->description($definition['warning_text'])
+                ->status($definition['warning_status'] ?? 'warning');
         }
 
         return $components;
@@ -50,7 +80,7 @@ class FormSchemaBuilder
 
         $name = $definition['name'] ?? null;
 
-        if (! $name && $type !== FieldType::Heading) {
+        if (! $name && ! in_array($type, [FieldType::Heading, FieldType::Section], true)) {
             return null;
         }
 
@@ -69,22 +99,32 @@ class FormSchemaBuilder
             FieldType::DateTime => DateTimePicker::make($name),
             FieldType::FileUpload => FileUpload::make($name),
             FieldType::Toggle => Toggle::make($name),
-            FieldType::Heading => Placeholder::make($definition['name'] ?? ('heading_'.md5($definition['label'] ?? uniqid())))
+            FieldType::Heading => Placeholder::make($definition['name'] ?? ('heading_' . md5($definition['label'] ?? uniqid())))
                 ->hiddenLabel()
-                ->content(fn () => new \Illuminate\Support\HtmlString(
-                    '<div class="text-lg font-bold">'.e($definition['label'] ?? '').'</div>'
+                ->content(fn() => new HtmlString(
+                    '<div class="text-lg font-bold">' . e($definition['label'] ?? '') . '</div>'
+                )),
+            FieldType::Section => Placeholder::make($definition['name'] ?? ('section_' . md5($definition['label'] ?? uniqid())))
+                ->hiddenLabel()
+                ->content(fn() => new HtmlString(
+                    '<div class="space-y-1">'
+                        . '<div class="text-lg font-bold">' . e($definition['label'] ?? '') . '</div>'
+                        . (filled($definition['description'] ?? '') ? '<div class="text-sm text-gray-500">' . e($definition['description']) . '</div>' : '')
+                        . '</div>'
                 )),
         };
 
-        if ($type === FieldType::Heading) {
-            return static::applyVisibility($component, $definition);
+        if (in_array($type, [FieldType::Heading, FieldType::Section], true)) {
+            return static::applyVisibility($component, $definition)
+                ->columnSpan($definition['column_span'] ?? 'full');
         }
 
         $component
             ->label($definition['label'] ?? str($name)->headline()->toString())
             ->helperText($definition['help_text'] ?? null)
             ->placeholder($definition['placeholder'] ?? null)
-            ->columnSpan($definition['column_span'] ?? 'full');
+            ->columnSpan($definition['column_span'] ?? 'full')
+            ->rules($definition['validation_rules'] ?? []);
 
         // --- Conditional REQUIRED logic ---
         // Recomputed live as a closure so it reacts to other field changes
@@ -117,7 +157,7 @@ class FormSchemaBuilder
     protected static function optionsFor(array $definition): array
     {
         return collect($definition['options'] ?? [])
-            ->mapWithKeys(fn (array $opt) => [$opt['value'] => $opt['label']])
+            ->mapWithKeys(fn(array $opt) => [$opt['value'] => $opt['label']])
             ->all();
     }
 

@@ -16,7 +16,8 @@ enum FieldType: string
     case DateTime = 'datetime';
     case FileUpload = 'file';
     case Toggle = 'toggle';
-    case Heading = 'heading'; // static, non-input "section heading" block
+    case Heading = 'heading'; // static, non-input "heading" block
+    case Section = 'section'; // static, non-input section block with title + description
 
     public function label(): string
     {
@@ -34,6 +35,7 @@ enum FieldType: string
             self::FileUpload => 'File Upload',
             self::Toggle => 'Toggle Switch',
             self::Heading => 'Section Heading',
+            self::Section => 'Section',
         };
     }
 
@@ -53,13 +55,14 @@ enum FieldType: string
             self::FileUpload => 'heroicon-o-paper-clip',
             self::Toggle => 'heroicon-o-power',
             self::Heading => 'heroicon-o-bars-2',
+            self::Section => 'heroicon-o-rectangle-group',
         };
     }
 
     /** Whether this field type stores a real value (vs. being purely decorative). */
     public function isInput(): bool
     {
-        return $this !== self::Heading;
+        return ! in_array($this, [self::Heading, self::Section]);
     }
 
     /** Whether this field type supports an `options` array (select/radio/checkbox group). */
@@ -71,7 +74,7 @@ enum FieldType: string
     public static function options(): array
     {
         return collect(self::cases())
-            ->mapWithKeys(fn (self $case) => [$case->value => $case->label()])
+            ->mapWithKeys(fn(self $case) => [$case->value => $case->label()])
             ->all();
     }
 }
