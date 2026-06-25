@@ -5,6 +5,7 @@ namespace App\Filament\Resources\FormSubmissions;
 use App\Filament\Resources\FormSubmissions\Pages\CreateFormSubmission;
 use App\Filament\Resources\FormSubmissions\Pages\EditFormSubmission;
 use App\Filament\Resources\FormSubmissions\Pages\ListFormSubmissions;
+use App\Filament\Resources\FormSubmissions\Pages\ViewFormSubmission;
 use App\Filament\Resources\FormSubmissions\Schemas\FormSubmissionForm;
 use App\Filament\Resources\FormSubmissions\Tables\FormSubmissionsTable;
 use App\Models\FormSubmission;
@@ -44,6 +45,7 @@ class FormSubmissionResource extends Resource
         return [
             'index' => ListFormSubmissions::route('/'),
             'create' => CreateFormSubmission::route('/create'),
+            'view' => ViewFormSubmission::route('/{record}'),
             // 'edit' => EditFormSubmission::route('/{record}/edit'),
         ];
     }

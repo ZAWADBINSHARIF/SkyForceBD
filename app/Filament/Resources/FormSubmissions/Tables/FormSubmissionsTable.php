@@ -32,7 +32,7 @@ class FormSubmissionsTable
 
                 TextColumn::make('created_at')
                     ->label('Submitted at')
-                    ->dateTime()
+                    ->dateTime(timezone: 'Asia/Dhaka', format: 'd-M-Y h:i:s A')
                     ->sortable(),
             ])
             ->filters([
