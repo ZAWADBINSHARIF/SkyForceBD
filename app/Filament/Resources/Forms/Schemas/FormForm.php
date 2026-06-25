@@ -120,7 +120,8 @@ class FormForm
                             ->options(FieldType::options())
                             ->required()
                             ->live()
-                            ->native(false),
+                            ->native(false)
+                            ->afterStateUpdated(fn(Get $get, Set $set, ?string $state) => static::syncValidationRules($get, $set)),
 
                         TextInput::make('label')
                             ->label('Field label')
@@ -162,11 +163,76 @@ class FormForm
                             ->columnSpanFull()
                             ->visible(fn(Get $get) => FieldType::tryFrom($get('type') ?? '')?->isInput() ?? true),
 
-                        Textarea::make('validation_rules')
-                            ->label('Validation rules')
-                            ->helperText('Enter Laravel validation rules separated by pipes, e.g. required|max:255')
-                            ->columnSpanFull()
-                            ->visible(fn(Get $get) => FieldType::tryFrom($get('type') ?? '')?->isInput() ?? true),
+                        Section::make('Validation')
+                            ->columns(2)
+                            ->schema([
+                                Toggle::make('validation_simple.advanced')
+                                    ->label('Advanced validation rules')
+                                    ->helperText('Use raw Laravel validation rules only when needed')
+                                    ->live()
+                                    ->default(false)
+                                    ->dehydrated(false)
+                                    ->columnSpanFull()
+                                    ->afterStateUpdated(fn(Get $get, Set $set, ?bool $state) => static::syncValidationRules($get, $set)),
+
+                                TextInput::make('validation_simple.min_length')
+                                    ->label('Minimum characters')
+                                    ->numeric()
+                                    ->helperText('For text, email, and textarea fields')
+                                    ->visible(fn(Get $get) => ! $get('validation_simple.advanced') && in_array(
+                                        FieldType::tryFrom($get('type') ?? ''),
+                                        [FieldType::Text, FieldType::Email, FieldType::Textarea],
+                                        true
+                                    ))
+                                    ->dehydrated(false)
+                                    ->reactive()
+                                    ->afterStateUpdated(fn(Get $get, Set $set, ?string $state) => static::syncValidationRules($get, $set)),
+
+                                TextInput::make('validation_simple.max_length')
+                                    ->label('Maximum characters')
+                                    ->numeric()
+                                    ->helperText('For text, email, and textarea fields')
+                                    ->visible(fn(Get $get) => ! $get('validation_simple.advanced') && in_array(
+                                        FieldType::tryFrom($get('type') ?? ''),
+                                        [FieldType::Text, FieldType::Email, FieldType::Textarea],
+                                        true
+                                    ))
+                                    ->dehydrated(false)
+                                    ->reactive()
+                                    ->afterStateUpdated(fn(Get $get, Set $set, ?string $state) => static::syncValidationRules($get, $set)),
+
+                                TextInput::make('validation_simple.min_value')
+                                    ->label('Minimum value')
+                                    ->numeric()
+                                    ->helperText('For number fields')
+                                    ->visible(fn(Get $get) => ! $get('validation_simple.advanced') && (FieldType::tryFrom($get('type') ?? '') ?? null) === FieldType::Number)
+                                    ->dehydrated(false)
+                                    ->reactive()
+                                    ->afterStateUpdated(fn(Get $get, Set $set, ?string $state) => static::syncValidationRules($get, $set)),
+
+                                TextInput::make('validation_simple.max_value')
+                                    ->label('Maximum value')
+                                    ->numeric()
+                                    ->helperText('For number fields')
+                                    ->visible(fn(Get $get) => ! $get('validation_simple.advanced') && (FieldType::tryFrom($get('type') ?? '') ?? null) === FieldType::Number)
+                                    ->dehydrated(false)
+                                    ->reactive()
+                                    ->afterStateUpdated(fn(Get $get, Set $set, ?string $state) => static::syncValidationRules($get, $set)),
+
+                                Textarea::make('validation_rules')
+                                    ->label('Validation rules')
+                                    ->helperText('Enter Laravel validation rules separated by pipes, e.g. required|max:255')
+                                    ->columnSpanFull()
+                                    ->visible(fn(Get $get) => $get('validation_simple.advanced'))
+                                    ->afterStateHydrated(function ($component, $state) {
+                                        if (! $component->getState()) {
+                                            return;
+                                        }
+
+                                        $component->state($state);
+                                    }),
+                            ])
+                            ->columnSpanFull(),
 
                         TextInput::make('warning_text')
                             ->label('Warning text')
@@ -193,7 +259,9 @@ class FormForm
                         Toggle::make('required')
                             ->label('Required by default')
                             ->helperText('Can be overridden below by a condition set to "Require"')
-                            ->visible(fn(Get $get) => FieldType::tryFrom($get('type') ?? '')?->isInput() ?? true),
+                            ->visible(fn(Get $get) => FieldType::tryFrom($get('type') ?? '')?->isInput() ?? true)
+                            ->live()
+                            ->afterStateUpdated(fn(Get $get, Set $set, ?bool $state) => static::syncValidationRules($get, $set)),
 
                         Repeater::make('options')
                             ->label('Options')
@@ -210,6 +278,43 @@ class FormForm
 
                 static::conditionsSection(),
             ]);
+    }
+
+    protected static function syncValidationRules(Get $get, Set $set): void
+    {
+        if ($get('validation_simple.advanced')) {
+            return;
+        }
+
+        $rules = [];
+
+        if ($get('required')) {
+            $rules[] = 'required';
+        }
+
+        match (FieldType::tryFrom($get('type') ?? '')) {
+            FieldType::Email => $rules[] = 'email',
+            FieldType::Number => $rules[] = 'numeric',
+            default => null,
+        };
+
+        if (filled($min = $get('validation_simple.min_length'))) {
+            $rules[] = 'min:' . intval($min);
+        }
+
+        if (filled($max = $get('validation_simple.max_length'))) {
+            $rules[] = 'max:' . intval($max);
+        }
+
+        if (filled($min = $get('validation_simple.min_value'))) {
+            $rules[] = 'min:' . $min;
+        }
+
+        if (filled($max = $get('validation_simple.max_value'))) {
+            $rules[] = 'max:' . $max;
+        }
+
+        $set('validation_rules', implode('|', array_filter($rules)));
     }
 
     /**

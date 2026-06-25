@@ -44,7 +44,7 @@
         {{-- ===================== FILL MODE ===================== --}}
         @php $activeForm = $this->getActiveForm(); @endphp
 
-        <div class="max-w-2xl">
+        <div class="container">
             <button
                 type="button"
                 wire:click="backToList"

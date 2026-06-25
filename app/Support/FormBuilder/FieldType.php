@@ -62,7 +62,18 @@ enum FieldType: string
     /** Whether this field type stores a real value (vs. being purely decorative). */
     public function isInput(): bool
     {
-        return ! in_array($this, [self::Heading, self::Section]);
+        return ! in_array($this, [
+            self::Heading,
+            self::Section,
+            self::Radio,
+            self::Select,
+            self::Checkbox,
+            self::CheckboxGroup,
+            self::Date,
+            self::DateTime,
+            self::FileUpload,
+            self::Toggle
+        ]);
     }
 
     /** Whether this field type supports an `options` array (select/radio/checkbox group). */

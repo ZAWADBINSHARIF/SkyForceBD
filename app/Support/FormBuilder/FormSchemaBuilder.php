@@ -15,6 +15,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
@@ -38,7 +39,10 @@ class FormSchemaBuilder
                 ->groupBy(fn(array $definition) => $definition['step'] ?? 'General')
                 ->map(function (\Illuminate\Support\Collection $fields, string $stepLabel) use ($definitions) {
                     return Step::make($stepLabel ?: 'General')
-                        ->schema($fields->flatMap(fn(array $definition) => static::buildSingleComponents($definition, $definitions))->all());
+                        ->schema([
+                            Grid::make(2)
+                                ->schema($fields->flatMap(fn(array $definition) => static::buildSingleComponents($definition, $definitions))->all()),
+                        ]);
                 })
                 ->values()
                 ->all();
@@ -46,9 +50,12 @@ class FormSchemaBuilder
             return [Wizard::make($steps)->startOnStep(1)];
         }
 
-        return collect($definitions)
-            ->flatMap(fn(array $definition) => static::buildSingleComponents($definition, $definitions))
-            ->all();
+        return [
+            Grid::make(2)
+                ->schema(collect($definitions)
+                    ->flatMap(fn(array $definition) => static::buildSingleComponents($definition, $definitions))
+                    ->all()),
+        ];
     }
 
     protected static function buildSingleComponents(array $definition, array $allDefinitions): array
@@ -122,9 +129,17 @@ class FormSchemaBuilder
         $component
             ->label($definition['label'] ?? str($name)->headline()->toString())
             ->helperText($definition['help_text'] ?? null)
-            ->placeholder($definition['placeholder'] ?? null)
             ->columnSpan($definition['column_span'] ?? 'full')
             ->rules($definition['validation_rules'] ?? []);
+
+        if (in_array($type, [
+            FieldType::Text,
+            FieldType::Email,
+            FieldType::Number,
+            FieldType::Textarea,
+        ], true)) {
+            $component->placeholder($definition['placeholder'] ?? null);
+        }
 
         // --- Conditional REQUIRED logic ---
         // Recomputed live as a closure so it reacts to other field changes
