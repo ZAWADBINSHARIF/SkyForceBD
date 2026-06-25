@@ -149,7 +149,7 @@ class FormForm
                             ->label('Column span')
                             ->options([
                                 'full' => 'Full width',
-                                2 => 'Half width',
+                                1 => 'Half width',
                             ])
                             ->default('full')
                             ->helperText('Choose how much horizontal space this field occupies on the public form'),

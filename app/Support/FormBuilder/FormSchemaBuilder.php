@@ -123,13 +123,13 @@ class FormSchemaBuilder
 
         if (in_array($type, [FieldType::Heading, FieldType::Section], true)) {
             return static::applyVisibility($component, $definition)
-                ->columnSpan($definition['column_span'] ?? 'full');
+                ->columnSpan(static::normalizeColumnSpan($definition['column_span'] ?? 'full'));
         }
 
         $component
             ->label($definition['label'] ?? str($name)->headline()->toString())
             ->helperText($definition['help_text'] ?? null)
-            ->columnSpan($definition['column_span'] ?? 'full')
+            ->columnSpan(static::normalizeColumnSpan($definition['column_span'] ?? 'full'))
             ->rules($definition['validation_rules'] ?? []);
 
         if (in_array($type, [
@@ -174,6 +174,19 @@ class FormSchemaBuilder
         return collect($definition['options'] ?? [])
             ->mapWithKeys(fn(array $opt) => [$opt['value'] => $opt['label']])
             ->all();
+    }
+
+    protected static function normalizeColumnSpan(int|string|null $columnSpan): int|string
+    {
+        if ($columnSpan === null) {
+            return 'full';
+        }
+
+        if ((string) $columnSpan === '2') {
+            return 1;
+        }
+
+        return $columnSpan;
     }
 
     /**
