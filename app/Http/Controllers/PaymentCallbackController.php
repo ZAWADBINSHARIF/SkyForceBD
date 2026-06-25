@@ -7,6 +7,7 @@ use App\Enums\OrderStatus;
 use App\Enums\TransactionStatus;
 use App\Models\Order;
 use App\Models\Transaction;
+use App\Services\BulkSMSBDService;
 use App\Services\SSLCommerzService;
 use DateTimeZone;
 use Illuminate\Http\RedirectResponse;
@@ -60,6 +61,9 @@ class PaymentCallbackController extends Controller
                     'delivery_status' => DeliveryStatus::Pending,
                     'order_receive_date' => now()
                 ]);
+
+                $sms = app(BulkSMSBDService::class);
+                $sms->send([$order->customer_phone], "Thank you for requesting order on our website. Order id: #{$order->order_number_short_code}. Our agent will call you soon.");
             } elseif (
                 $order->order_status    === OrderStatus::Responsed &&
                 $order->delivery_status === DeliveryStatus::Pending
