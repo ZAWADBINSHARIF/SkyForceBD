@@ -411,8 +411,7 @@ new class extends Component
                     {{ $errors->has('agreedToTerms') ? 'border-red-200 bg-red-50' : 'border-gray-100 hover:bg-gray-50' }}">
             <input type="checkbox" wire:model="agreedToTerms" class="mt-0.5 w-4 h-4 accent-primary-500 shrink-0" />
             <span class="text-sm text-gray-700">
-                আমি <span class="text-primary-600 font-medium">শর্তাবলী</span> পড়েছি এবং তাতে সম্মত আছি। আমি বুঝতে
-                পারছি যে যাচাইকরণ ফি ফেরতযোগ্য নয়।
+                আমি <span class="text-primary-600 font-medium">শর্তাবলী</span> পড়েছি এবং তাতে সম্মত আছি।
             </span>
         </label>
         @error('agreedToTerms')
