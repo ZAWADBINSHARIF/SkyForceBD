@@ -7,6 +7,8 @@
 
     <title>{{ $title ?? config('app.name') }}</title>
 
+    <link rel="icon" type="image/x-icon" href="/images/skyforce-logo.ico">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @livewireStyles
