@@ -39,7 +39,7 @@ class OrderMessageTemplates
             : '-';
 
         $products = collect($order->products ?? [])
-            ->map(fn($p) => $p['name'] ? $p['name'] . ' x' . $p['quantity'] : '')
+            ->map(fn($p) => array_key_exists('name', $p) ? $p['name'] . ' x' . $p['quantity'] : '')
             ->implode(', ');
 
         return str_replace(

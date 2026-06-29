@@ -130,7 +130,6 @@ class OrderForm
 
                                 TextInput::make('link')
                                     ->label('Product Link')
-                                    ->url()
                                     ->required()
                                     ->maxLength(FieldLength::Long->value)
                                     ->placeholder('https://...')

@@ -19,7 +19,7 @@ new class extends Component
     #[Url]
     public ?string $product_link = null;
 
-    // // Step 1
+    // Step 1
     public array $products = [
         //
     ];
@@ -53,7 +53,7 @@ new class extends Component
         } else {
             $this->products[] = [
                 'link' => "",
-                'quantity' => 0,
+                'quantity' => 1,
             ];
         }
 
@@ -64,7 +64,7 @@ new class extends Component
     {
         return [
             'products'             => 'required|array|min:1',
-            'products.*.link'      => 'required|url',
+            'products.*.link'      => 'required',
             'products.*.quantity'  => 'required|integer|min:1',
             'customerName'         => 'required|string|min:3',
             'phoneNumber'          => 'required|string|regex:/^[0-9+\-\s]{7,15}$/|max:11',
@@ -176,8 +176,8 @@ new class extends Component
 
     {{-- Header --}}
     <div class="max-w-lg mx-auto mb-6">
-        <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">Request an Order</h1>
-        <p class="text-base text-gray-500 mt-1">Fill in the details below to place your request</p>
+        <h1 class="text-xl font-bold text-gray-900">Request an Order</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Fill in the details below to place your request</p>
     </div>
 
     {{-- Step Indicator --}}
@@ -186,21 +186,21 @@ new class extends Component
             @foreach ([1 => 'Details', 2 => 'Terms', 3 => 'Payment'] as $s => $label)
             <div class="flex items-center {{ $s < $totalSteps ? 'flex-1' : '' }}">
                 <div class="flex flex-col items-center">
-                    <div @class([ 'w-12 h-12 rounded-full flex items-center justify-center text-base font-extrabold transition-all duration-300'
-                        , 'bg-primary-500 text-white shadow-md shadow-primary-200/50'=> $step >= $s,
+                    <div @class([ 'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300'
+                        , 'bg-primary-500 text-white shadow-sm shadow-primary-200'=> $step >= $s,
                         'bg-white border-2 border-gray-200 text-gray-400' => $step < $s, ])>
                             @if ($step > $s)
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                             @else
                             {{ $s }}
                             @endif
                     </div>
-                    <span @class([ 'text-base font-semibold mt-2' , 'text-primary-500'=> $step >= $s,
+                    <span @class([ 'text-[10px] font-medium mt-1' , 'text-primary-500'=> $step >= $s,
                         'text-gray-400' => $step < $s, ])>{{ $label }}</span>
                 </div>
-                @if ($s < $totalSteps) <div @class([ 'flex-1 h-1 mx-2 mb-4 transition-all duration-300'
+                @if ($s < $totalSteps) <div @class([ 'flex-1 h-0.5 mx-2 mb-4 transition-all duration-300'
                     , 'bg-primary-400'=> $step > $s,
                     'bg-gray-200' => $step <= $s, ])>
             </div>
@@ -213,7 +213,7 @@ new class extends Component
 {{-- Flash Success --}}
 @if (session('success'))
 <div
-    class="max-w-lg mx-auto mb-4 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-green-700 text-base font-semibold">
+    class="max-w-lg mx-auto mb-4 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-green-700 text-sm font-medium">
     ✓ {{ session('success') }}
 </div>
 @endif
@@ -224,24 +224,24 @@ new class extends Component
     {{-- ───────────── STEP 1 ───────────── --}}
     @if ($step === 1)
     <div class="px-5 py-6">
-        <div class="flex items-center gap-3 mb-5">
-            <div class="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center">
-                <span class="text-base font-extrabold text-primary-500">1</span>
+        <div class="flex items-center gap-2 mb-5">
+            <div class="w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center">
+                <span class="text-xs font-bold text-primary-500">1</span>
             </div>
-            <h2 class="text-xl font-extrabold text-gray-900">Order Details</h2>
+            <h2 class="text-base font-bold text-gray-900">Order Details</h2>
         </div>
 
         {{-- Product Items --}}
         <div class="space-y-3 mb-4">
             @foreach ($products as $i => $product)
-            <div class="rounded-xl border border-gray-100 bg-gray-50 p-3">
+            <div class="rounded-xl border border-gray-100 p-3">
                 <div class="flex items-center justify-between mb-2.5">
-                    <span class="text-base font-semibold text-gray-700 uppercase tracking-wide">Product link {{ $i + 1
+                    <span class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Product link {{ $i + 1
                         }}</span>
                     @if (count($products) > 1)
                     <button wire:click="removeProduct({{ $i }})" type="button"
-                        class="w-9 h-9 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center transition-colors">
-                        <svg class="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        class="w-5 h-5 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center transition-colors">
+                        <svg class="w-3 h-3 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                             stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -253,21 +253,21 @@ new class extends Component
                     <div>
                         <input type="url" wire:model.blur="products.{{ $i }}.link"
                             placeholder="https://example.com/product"
-                            class="w-full px-3 py-3 text-base bg-white border rounded-lg outline-none transition-colors
-                                            placeholder:text-gray-300
+                            class="w-full px-3 py-2 text-sm bg-[#F3F3F3] border rounded-lg outline-none transition-colors
+                                            placeholder:text-[#727171]
                                             {{ $errors->has('products.'.$i.'.link') ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-primary-400' }}" />
                         @error('products.'.$i.'.link')
-                        <p class="text-base text-red-500 mt-1">{{ $message }}</p>
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <span class="text-base font-semibold text-gray-700 shrink-0">Quantity</span>
+                        <span class="text-xs text-gray-500 shrink-0">Quantity</span>
                         <input type="number" wire:model.blur="products.{{ $i }}.quantity" min="1" placeholder="1"
-                            class="w-24 px-3 py-3 text-base bg-white border rounded-lg outline-none transition-colors
+                            class="w-24 px-3 py-2 text-sm bg-[#F3F3F3] border rounded-lg outline-none transition-colors
                                             {{ $errors->has('products.'.$i.'.quantity') ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-primary-400' }}" />
                         @error('products.'.$i.'.quantity')
-                        <p class="text-base text-red-500 mt-1">{{ $message }}</p>
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -275,57 +275,68 @@ new class extends Component
             @endforeach
         </div>
 
-        <button wire:click="addProduct" type="button" class="w-full py-3.5 rounded-2xl border border-dashed border-primary-300 text-primary-500 text-base font-semibold
-                        hover:bg-primary-50 transition-colors flex items-center justify-center gap-2 mb-5">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        {{-- Add Another Product Checkbox --}}
+        {{-- <div class="mb-5">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" wire:click="addProduct"
+                    class="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500">
+                <span class="text-sm text-gray-700">
+                    Add Another Product
+                </span>
+            </label>
+        </div> --}}
+
+        {{-- <button wire:click="addProduct" type="button" class="w-full py-2 rounded-xl border-primary-300 text-primary-500 text-sm font-medium
+                        hover:bg-primary-50 transition-colors flex items-center justify-center gap-1.5 mb-5">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Add Another Product
-        </button>
+        </button> --}}
+
 
         <div class="border-t border-gray-100 pt-4 space-y-3">
             {{-- Customer Name --}}
             <div>
-                <label class="block text-base font-semibold text-gray-800 mb-1.5">
+                <label class="block text-xs font-semibold text-gray-600 mb-1.5">
                     Customer Name <span class="text-red-400">*</span>
                 </label>
                 <input type="text" wire:model.blur="customerName" placeholder="Your full name"
-                    class="w-full px-3 py-3 text-base border rounded-lg outline-none transition-colors placeholder:text-gray-300
+                    class="w-full bg-[#F3F3F3] px-3 py-2 text-sm border rounded-lg outline-none transition-colors placeholder:text-[#727171]
                                 {{ $errors->has('customerName') ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-primary-400' }}" />
                 @error('customerName')
-                <p class="text-base text-red-500 mt-1">{{ $message }}</p>
+                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             {{-- Phone --}}
             <div>
-                <label class="block text-base font-semibold text-gray-800 mb-1.5">
+                <label class="block text-xs font-semibold text-gray-600 mb-1.5">
                     Phone Number <span class="text-red-400">*</span>
                 </label>
                 <input type="tel" wire:model.blur="phoneNumber" placeholder="017XXXXXXXX"
-                    class="w-full px-3 py-3 text-base border rounded-lg outline-none transition-colors placeholder:text-gray-300
+                    class="w-full bg-[#F3F3F3] px-3 py-2 text-sm border rounded-lg outline-none transition-colors placeholder:text-[#727171]
                                 {{ $errors->has('phoneNumber') ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-primary-400' }}" />
                 @error('phoneNumber')
-                <p class="text-base text-red-500 mt-1">{{ $message }}</p>
+                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             {{-- Note --}}
             <div>
-                <label class="block text-base font-semibold text-gray-800 mb-1.5">Additional Note <span
-                        class="text-gray-500">(optional)</span></label>
+                <label class="block text-xs font-semibold text-gray-600 mb-1.5">Additional Note <span
+                        class="text-gray-300">(optional)</span></label>
                 <textarea wire:model.blur="additionalNote" rows="3"
-                    placeholder="Any special instructions, size, color, variant..." class="w-full px-3 py-3 text-base border border-gray-200 rounded-lg outline-none transition-colors
-                                focus:border-primary-400 placeholder:text-gray-300 resize-none"></textarea>
+                    placeholder="Any special instructions, size, color, variant..." class="w-full px-3 py-2 text-sm border bg-[#F3F3F3] border-gray-200 rounded-lg outline-none transition-colors
+                                focus:border-primary-400 placeholder:text-[#727171] resize-none"></textarea>
             </div>
         </div>
     </div>
 
     <div class="px-5 pb-5">
-        <button wire:click="goToStep2" type="button"
-            class="btn-primary w-full py-3 rounded-xl font-semibold text-base flex items-center justify-center gap-3">
+        <button wire:click="goToStep2" type="button" class="btn-primary w-full py-2.5 rounded-xl font-semibold">
             Continue to Terms
-            <svg class="w-6 h-6 inline ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <svg class="w-4 h-4 inline ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
             </svg>
         </button>
@@ -335,16 +346,16 @@ new class extends Component
     {{-- ───────────── STEP 2 ───────────── --}}
     @if ($step === 2)
     <div class="px-5 py-6">
-        <div class="flex items-center gap-3 mb-5">
-            <div class="w-11 h-11 rounded-full bg-primary-50 flex items-center justify-center">
-                <span class="text-lg font-extrabold text-primary-500">2</span>
+        <div class="flex items-center gap-2 mb-5">
+            <div class="w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center">
+                <span class="text-xs font-bold text-primary-500">2</span>
             </div>
-            <h2 class="text-xl font-extrabold text-gray-900">Terms & Conditions</h2>
+            <h2 class="text-base font-bold text-gray-900">Terms & Conditions</h2>
         </div>
 
         <div
-            class="bg-gray-50 rounded-xl border border-gray-100 p-4 max-h-72 overflow-y-auto text-base text-gray-600 space-y-3 leading-relaxed mb-4">
-            <div class="prose text-base text-gray-700">
+            class="bg-gray-50 rounded-xl border border-gray-100 p-4 max-h-72 overflow-y-auto text-sm text-gray-600 space-y-3 leading-relaxed mb-4">
+            <div class="prose text-sm text-gray-700">
 
                 <h3>অর্ডার রিকোয়েস্ট করার পরও কেন কোন রেসপন্স পাচ্ছি না?</h3>
 
@@ -410,28 +421,26 @@ new class extends Component
         <label
             class="flex items-start gap-3 cursor-pointer p-3 rounded-xl border transition-colors
                     {{ $errors->has('agreedToTerms') ? 'border-red-200 bg-red-50' : 'border-gray-100 hover:bg-gray-50' }}">
-            <input type="checkbox" wire:model="agreedToTerms" class="mt-0.5 w-6 h-6 accent-primary-500 shrink-0" />
-            <span class="text-base text-gray-700">
-                আমি <span class="text-primary-600 font-semibold">শর্তাবলী</span> পড়েছি এবং তাতে সম্মত আছি।
+            <input type="checkbox" wire:model="agreedToTerms" class="mt-0.5 w-4 h-4 accent-primary-500 shrink-0" />
+            <span class="text-sm text-gray-700">
+                আমি <span class="text-primary-600 font-medium">শর্তাবলী</span> পড়েছি এবং তাতে সম্মত আছি।
             </span>
         </label>
         @error('agreedToTerms')
-        <p class="text-base text-red-500 mt-1.5 ml-1">{{ $message }}</p>
+        <p class="text-xs text-red-500 mt-1.5 ml-1">{{ $message }}</p>
         @enderror
     </div>
 
     <div class="px-5 pb-5 flex gap-3">
-        <button wire:click="goBack" type="button"
-            class="btn flex-1 py-3 rounded-xl font-semibold text-base flex items-center justify-center gap-2">
-            <svg class="w-6 h-6 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <button wire:click="goBack" type="button" class="btn flex-1 py-2.5 rounded-xl font-semibold">
+            <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
             Back
         </button>
-        <button wire:click="goToStep3" type="button"
-            class="btn-primary flex-1 py-3 rounded-xl font-semibold text-base flex items-center justify-center gap-2">
+        <button wire:click="goToStep3" type="button" class="btn-primary flex-1 py-2.5 rounded-xl font-semibold">
             Agree & Continue
-            <svg class="w-6 h-6 inline ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <svg class="w-4 h-4 inline ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
             </svg>
         </button>
@@ -441,22 +450,22 @@ new class extends Component
     {{-- ───────────── STEP 3 ───────────── --}}
     @if ($step === 3)
     <div class="px-5 py-6">
-        <div class="flex items-center gap-3 mb-5">
-            <div class="w-11 h-11 rounded-full bg-primary-50 flex items-center justify-center">
-                <span class="text-lg font-extrabold text-primary-500">3</span>
+        <div class="flex items-center gap-2 mb-5">
+            <div class="w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center">
+                <span class="text-xs font-bold text-primary-500">3</span>
             </div>
-            <h2 class="text-xl font-extrabold text-gray-900">Verification Payment</h2>
+            <h2 class="text-base font-bold text-gray-900">Verification Payment</h2>
         </div>
 
         {{-- Amount card --}}
         <div class="bg-primary-50 border border-primary-100 rounded-xl p-4 mb-4 flex items-center justify-between">
             <div>
-                <p class="text-base text-primary-600 font-semibold mb-0.5">Order Verification Fee</p>
-                <p class="text-3xl font-bold text-primary-600">৳ 65</p>
-                <p class="text-base text-primary-400 mt-0.5">One-time, non-refundable</p>
+                <p class="text-xs text-primary-600 font-medium mb-0.5">Order Verification Fee</p>
+                <p class="text-2xl font-bold text-primary-600">৳ 65</p>
+                <p class="text-xs text-primary-400 mt-0.5">One-time, non-refundable</p>
             </div>
-            <div class="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center">
-                <svg class="w-7 h-7 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            <div class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
+                <svg class="w-6 h-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                     stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -467,7 +476,7 @@ new class extends Component
         {{-- How to pay --}}
         <div class="rounded-xl border border-gray-100 divide-y divide-gray-100 mb-4">
             <div class="px-4 py-3">
-                <p class="text-base text-gray-600 leading-relaxed">
+                <p class="text-xs text-gray-500 leading-relaxed">
                     Send <strong class="text-gray-700">৳65</strong> to any number above using
                     <strong class="text-gray-700">Send Money</strong>, then tap the button below.
                 </p>
@@ -476,17 +485,17 @@ new class extends Component
 
         {{-- Order summary mini --}}
         <div class="bg-gray-50 rounded-xl border border-gray-100 px-4 py-3 mb-5">
-            <p class="text-base font-semibold text-gray-700 uppercase tracking-wide mb-2">Order Summary</p>
-            <div class="space-y-2">
-                <div class="flex justify-between text-base">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Order Summary</p>
+            <div class="space-y-1">
+                <div class="flex justify-between text-sm">
                     <span class="text-gray-500">Customer</span>
                     <span class="text-gray-800 font-medium">{{ $customerName }}</span>
                 </div>
-                <div class="flex justify-between text-base">
+                <div class="flex justify-between text-sm">
                     <span class="text-gray-500">Phone</span>
                     <span class="text-gray-800 font-medium">{{ $phoneNumber }}</span>
                 </div>
-                <div class="flex justify-between text-base">
+                <div class="flex justify-between text-sm">
                     <span class="text-gray-500">Products</span>
                     <span class="text-gray-800 font-medium">{{ count($products) }} item(s)</span>
                 </div>
@@ -495,16 +504,15 @@ new class extends Component
     </div>
 
     <div class="px-5 pb-5 flex gap-3">
-        <button wire:click="goBack" type="button"
-            class="btn flex-1 py-3 rounded-xl font-semibold text-base flex items-center justify-center gap-2">
-            <svg class="w-6 h-6 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <button wire:click="goBack" type="button" class="btn flex-1 py-2.5 rounded-xl font-semibold">
+            <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
             Back
         </button>
         <button wire:click="openModal" type="button"
-            class="btn-primary flex-1 py-3 rounded-xl font-semibold text-base flex items-center justify-center gap-2">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            class="btn-primary flex-1 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
                     d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
@@ -514,18 +522,18 @@ new class extends Component
 
     {{-- YouTube explainer --}}
     <div class="border-t border-gray-100 px-5 py-5">
-        <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 rounded bg-red-500 flex items-center justify-center shrink-0">
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-5 h-5 rounded bg-red-500 flex items-center justify-center shrink-0">
+                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M10 15.5l6-3.5-6-3.5v7z" />
                     <path fill-rule="evenodd"
                         d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z"
                         clip-rule="evenodd" />
                 </svg>
             </div>
-            <p class="text-base font-extrabold text-gray-700">Why do we charge ৳65?</p>
+            <p class="text-sm font-semibold text-gray-700">Why do we charge ৳65?</p>
         </div>
-        <p class="text-base text-gray-600 mb-3 leading-relaxed">
+        <p class="text-xs text-gray-500 mb-3 leading-relaxed">
             Watch this short video to understand why we collect a verification fee and how it protects both you and us.
         </p>
         <div class="rounded-xl overflow-hidden border border-gray-100 aspect-video">
@@ -539,6 +547,10 @@ new class extends Component
     @endif
 
 </div>
+
+<p class="text-center text-xs text-gray-400 mt-4 mb-8">
+    Need help? Contact us on WhatsApp
+</p>
 
 
 {{-- Modal --}}
@@ -554,12 +566,12 @@ new class extends Component
         {{-- Header --}}
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div>
-                <h2 class="text-lg font-extrabold text-gray-900">Select Payment Method</h2>
-                <p class="text-base text-gray-400 mt-0.5">Total: <span class="font-bold text-gray-700">৳65</span></p>
+                <h2 class="text-sm font-bold text-gray-900">Select Payment Method</h2>
+                <p class="text-xs text-gray-400 mt-0.5">Total: <span class="font-semibold text-gray-700">৳65</span></p>
             </div>
             <button wire:click="closeModal" type="button"
-                class="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
@@ -576,18 +588,18 @@ new class extends Component
 
                 {{-- bKash logo mark --}}
                 <div class="w-14 h-14 rounded-xl bg-[#E2136E] flex items-center justify-center shrink-0">
-                    <span class="text-white font-black text-base tracking-tight">bKash</span>
+                    <span class="text-white font-black text-xs tracking-tight">bKash</span>
                 </div>
 
                 <div class="text-left flex-1">
-                    <p class="text-base font-bold text-gray-800">bKash</p>
-                    <p class="text-base text-gray-500">Mobile banking · instant</p>
+                    <p class="text-sm font-semibold text-gray-800">bKash</p>
+                    <p class="text-xs text-gray-400">Mobile banking · instant</p>
                 </div>
 
-                <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+                <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
                     {{ $selectedMethod === 'bkash' ? 'border-pink-500 bg-pink-500' : 'border-gray-300' }}">
                     @if ($selectedMethod === 'bkash')
-                    <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                         stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
@@ -603,21 +615,21 @@ new class extends Component
 
                 {{-- SSLCommerz logo mark --}}
                 <div class="w-14 h-14 rounded-xl bg-[#0B5EA8] flex items-center justify-center shrink-0">
-                    <span class="text-white font-black text-base leading-tight text-center">SSL<br>Commerz</span>
+                    <span class="text-white font-black text-[9px] leading-tight text-center">SSL<br>Commerz</span>
                 </div>
 
                 <div class="text-left flex-1">
-                    <p class="text-base font-bold text-gray-800">SSLCommerz</p>
-                    <p class="text-base text-gray-500">Card · online bank · mobile bank</p>
+                    <p class="text-sm font-semibold text-gray-800">SSLCommerz</p>
+                    <p class="text-xs text-gray-400">Card · online bank · mobile bank</p>
                     <div>
                         <img src="{{asset('images/sslcommerz-we-accept.png')}}" />
                     </div>
                 </div>
 
-                <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+                <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
                     {{ $selectedMethod === 'sslcommerz' ? 'border-primary-500 bg-primary-500' : 'border-gray-300' }}">
                     @if ($selectedMethod === 'sslcommerz')
-                    <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                         stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
@@ -629,7 +641,7 @@ new class extends Component
 
         {{-- Footer --}}
         <div class="px-5 pb-5">
-            <button wire:click="proceedPayment" type="button" @disabled(empty($selectedMethod)) class="w-full py-3.5 rounded-2xl font-semibold text-base transition-all duration-150 flex items-center justify-center gap-3
+            <button wire:click="proceedPayment" type="button" @disabled(empty($selectedMethod)) class="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-150 flex items-center justify-center gap-2
                     {{ !empty($selectedMethod)
                         ? 'btn-primary'
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed' }}">
@@ -647,7 +659,7 @@ new class extends Component
                     @endif
                 </span>
                 <span wire:loading wire:target="proceedPayment" class="flex items-center gap-2">
-                    <svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
@@ -655,8 +667,8 @@ new class extends Component
                 </span>
             </button>
 
-            <p class="text-center text-base text-gray-500 mt-3">
-                <svg class="w-7 h-7 inline-block mb-0.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            <p class="text-center text-xs text-gray-400 mt-3">
+                <svg class="w-3 h-3 inline-block mb-0.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                     stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
