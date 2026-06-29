@@ -236,8 +236,7 @@ new class extends Component
             @foreach ($products as $i => $product)
             <div class="rounded-xl border border-gray-100 p-3">
                 <div class="flex items-center justify-between mb-2.5">
-                    <span class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Product link {{ $i + 1
-                        }}</span>
+                    <span class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Product link</span>
                     @if (count($products) > 1)
                     <button wire:click="removeProduct({{ $i }})" type="button"
                         class="w-5 h-5 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center transition-colors">
