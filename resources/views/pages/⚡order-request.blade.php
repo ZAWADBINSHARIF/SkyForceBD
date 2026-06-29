@@ -183,7 +183,7 @@ new class extends Component
     {{-- Step Indicator --}}
     <div class="max-w-lg mx-auto mb-6">
         <div class="flex items-center gap-0">
-            @foreach ([1 => 'Details', 2 => 'Terms', 3 => 'Payment'] as $s => $label)
+            @foreach ([1 => 'Details', 2 => 'Terms', 3 => 'Done'] as $s => $label)
             <div class="flex items-center {{ $s < $totalSteps ? 'flex-1' : '' }}">
                 <div class="flex flex-col items-center">
                     <div @class([ 'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300'
@@ -547,10 +547,6 @@ new class extends Component
     @endif
 
 </div>
-
-<p class="text-center text-xs text-gray-400 mt-4 mb-8">
-    Need help? Contact us on WhatsApp
-</p>
 
 
 {{-- Modal --}}

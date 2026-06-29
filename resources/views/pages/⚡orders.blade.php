@@ -257,40 +257,40 @@ new class extends Component
 <div class="min-h-screen">
 
     {{-- Orders --}}
-    <div class="max-w-6xl mx-auto bg-white rounded-xl px-4 sm:px-6 py-6 space-y-5 mt-12">
+    <div class="max-w-6xl mx-auto bg-white rounded-lg px-4 py-5 space-y-3 mt-12">
 
         @foreach ($orders as $order)
 
 
-        <div class="border-2 border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+        <div class="border border-gray-100 rounded-xl overflow-hidden">
 
             {{-- Order ID bar --}}
-            <div class="flex items-center justify-between px-4 sm:px-5 py-3.5 bg-gray-50 border-b border-gray-100">
-                <span class="text-sm sm:text-base font-black text-gray-700 tracking-widest uppercase font-mono">
+            <div class="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-100">
+                <span class="text-xs font-bold text-gray-500 tracking-widest uppercase font-mono">
                     #{{ $order->order_number_short_code }}
                 </span>
                 <button
-                    class="px-4 py-2 bg-gray-950 text-white text-xs sm:text-sm font-black uppercase tracking-wider rounded-lg hover:bg-gray-700 transition-colors">
+                    class="px-3 py-1 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-md hover:bg-gray-700 transition-colors">
                     Checkout
                 </button>
             </div>
 
             {{-- Products --}}
             @foreach ($order['products'] as $product)
-            <div class="flex gap-3 px-4 sm:px-5 py-5 border-b border-gray-50">
+            <div class="flex gap-3 px-4 py-4 border-b border-gray-50">
 
                 {{-- Info --}}
                 <div class="flex-1 min-w-0 flex items-start justify-between gap-3">
 
                     <div class="flex-1 min-w-0">
 
-                        <p class="text-base sm:text-lg font-extrabold text-gray-950 leading-snug line-clamp-2">
+                        <p class="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">
                             {{ $product['name'] ?? 'Unnamed' }}
                         </p>
 
                         @if (!empty($product['link']))
                         <a href="{{ $product['link'] }}" target="_blank" rel="noopener noreferrer"
-                            class="text-sm font-semibold text-primary-600 hover:underline break-all line-clamp-2 mt-1">
+                            class="text-xs text-primary-500 hover:underline break-all line-clamp-2">
                             {{ $product['link'] }}
                         </a>
                         @endif
@@ -300,7 +300,7 @@ new class extends Component
                     {{-- Price --}}
                     @if (isset($product['unit_price'], $product['total_price'], $product['quantity']))
                     <div class="shrink-0 text-right">
-                        <p class="text-sm sm:text-base font-black text-primary-600 whitespace-nowrap">
+                        <p class="text-xs font-bold text-primary-500 whitespace-nowrap">
                             BDT {{ number_format((float) $product['unit_price']) }}
                             × {{ number_format((float) $product['quantity']) }}
                             = {{ number_format((float) $product['total_price']) }}
@@ -315,8 +315,8 @@ new class extends Component
 
             {{-- Customer remark --}}
             @if ($order['customer_remark'])
-            <div class="px-4 sm:px-5 py-3">
-                <p class="text-sm font-semibold text-gray-600 line-clamp-1">
+            <div class="px-4 py-2">
+                <p class="text-xs text-gray-500 line-clamp-1">
                     Note: {{ $order['customer_remark'] }}
                 </p>
             </div>
@@ -371,11 +371,11 @@ new class extends Component
             $isRejected = ($currentOrderStatus === 'rejected');
             @endphp
 
-            <div class="px-4 sm:px-5 py-4 space-y-5 bg-gray-50/70 border-t border-gray-100">
+            <div class="px-4 py-3 space-y-5 bg-gray-50/50 border-t border-gray-100">
 
                 {{-- Order Status Row --}}
-                <div class="flex flex-wrap items-center gap-x-2 gap-y-2">
-                    <span class="text-sm font-black text-gray-600 uppercase tracking-wider mr-1">Order</span>
+                <div class="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                    <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mr-1">Order</span>
 
                     @foreach ($orderBadges as $badge)
                     @php
@@ -388,21 +388,21 @@ new class extends Component
                         $isActive=($badge['value']==='order_request' ); $isPast=false; } @endphp <span
                         class="inline-flex items-center gap-1">
                         <span
-                            class="px-3 py-1.5 rounded-full text-xs sm:text-sm font-black uppercase
-                                {{ $isActive || $isPast ? 'bg-primary-500 text-white shadow-sm' : 'bg-white text-gray-500 border-2 border-gray-200' }}">
+                            class="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase
+                                {{ $isActive || $isPast ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-400 border border-gray-200' }}">
                             {{ $badge['label'] }}
                         </span>
                         @if (!$loop->last)
-                        <span class="text-gray-400 text-base font-black">→</span>
+                        <span class="text-gray-300 text-xs">→</span>
                         @endif
                         </span>
                         @endforeach
 
                         {{-- Rejected pill at the end --}}
                         @if ($isRejected)
-                        <span class="text-gray-400 text-base font-black ml-1">→</span>
+                        <span class="text-gray-300 text-xs ml-1">→</span>
                         <span
-                            class="px-3 py-1.5 rounded-full text-xs sm:text-sm font-black uppercase bg-red-100 text-red-700 border-2 border-red-200">
+                            class="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-red-100 text-red-600 border border-red-200">
                             Rejected
                         </span>
                         @endif
@@ -417,8 +417,8 @@ new class extends Component
                 $isCancelled = ($currentDeliveryStatus === 'cancelled');
                 @endphp
 
-                <div class="flex flex-wrap items-center gap-x-2 gap-y-2">
-                    <span class="text-sm font-black text-gray-600 uppercase tracking-wider mr-1">Delivery</span>
+                <div class="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                    <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mr-1">Delivery</span>
 
                     @if (!$isCancelled)
                     @foreach ($deliveryBadges as $badge)
@@ -428,19 +428,19 @@ new class extends Component
                     $isPast = ($currentDeliveryIndex !== false && $badgeIndex < $currentDeliveryIndex); @endphp <span
                         class="inline-flex items-center gap-1">
                         <span
-                            class="px-3 py-1.5 rounded-full text-xs sm:text-sm font-black uppercase
-                                        {{ $isActive || $isPast ? 'bg-green-600 text-white shadow-sm' : 'bg-white text-gray-500 border-2 border-gray-200' }}">
+                            class="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase
+                                        {{ $isActive || $isPast ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-400 border border-gray-200' }}">
                             {{ $badge['label'] }}
                         </span>
                         @if (!$loop->last)
-                        <span class="text-gray-400 text-base font-black">→</span>
+                        <span class="text-gray-300 text-xs">→</span>
                         @endif
                         </span>
                         @endforeach
                         @else
                         {{-- Cancelled pill --}}
                         <span
-                            class="px-3 py-1.5 rounded-full text-xs sm:text-sm font-black uppercase bg-red-100 text-red-700 border-2 border-red-200">
+                            class="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-red-100 text-red-600 border border-red-200">
                             Cancelled
                         </span>
                         @endif
@@ -449,30 +449,30 @@ new class extends Component
             </div>
 
             {{-- Footer (unchanged) --}}
-            <div class="px-4 sm:px-5 py-4 flex-col gap-3">
-                <div class="px-0 sm:px-4 py-3 flex items-center justify-end gap-3">
+            <div class="px-4 py-3 flex-col gap-3">
+                <div class="px-4 py-3 flex items-center justify-end gap-3">
                     @if ($order->isOrderRequest())
                     <div class="flex flex-col items-end">
-                        <p class="text-sm text-gray-600">
-                            <span class="font-black text-primary-600 ml-1">Inquiring...</span>
+                        <p class="text-xs text-gray-500">
+                            <span class="font-bold text-primary-500 ml-1">Inquiring...</span>
                         </p>
                     </div>
                     @else
                     <div class="flex flex-col items-end">
-                        <p class="text-sm font-semibold text-gray-600">
+                        <p class="text-xs text-gray-500">
                             Shipping charge:
-                            <span class="font-black text-primary-600 ml-1">BDT {{
+                            <span class="font-bold text-primary-500 ml-1">BDT {{
                                 number_format($order['shipping_charge'])
                                 }}</span>
                         </p>
-                        <p class="text-sm font-semibold text-gray-600">
+                        <p class="text-xs text-gray-500">
                             Lead Total:
-                            <span class="font-black text-primary-600 ml-1">BDT {{ number_format($order['total_price'])
+                            <span class="font-bold text-primary-500 ml-1">BDT {{ number_format($order['total_price'])
                                 }}</span>
                         </p>
-                        <p class="text-sm font-semibold text-gray-600">
+                        <p class="text-xs text-gray-500">
                             Paid:
-                            <span class="font-black text-green-700 ml-1">BDT {{ number_format($order['total_paid'])
+                            <span class="font-bold text-green-600 ml-1">BDT {{ number_format($order['total_paid'])
                                 }}</span>
                         </p>
                     </div>
@@ -483,12 +483,12 @@ new class extends Component
                     @if ($order->isResponded() && $order->isPending() && $order->advance_payment > 0 &&
                     !$order->isLatestTransactionStatusPending())
                     <button wire:click="openTheOrderCancelConfirmationModal({{$order->id}})"
-                        class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-black rounded-xl transition-colors">
+                        class="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-lg transition-colors">
                         Cancel
                     </button>
                     <button
                         wire:click="$set('order_id', {{ $order->id }}); $set('amount', {{ $order->advance_payment }}); openModal()"
-                        class="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white text-sm font-black rounded-xl transition-colors shadow-sm">
+                        class="px-3.5 py-1.5 bg-primary-500 hover:bg-primary-600 text-white text-xs font-semibold rounded-lg transition-colors">
                         Pay Advance ৳{{$order->advance_payment}}
                     </button>
                     @endif
@@ -502,11 +502,11 @@ new class extends Component
 
         @if($orders->isEmpty())
         <div class="flex flex-col items-center justify-center py-24 text-center">
-            <div class="w-20 h-20 rounded-full bg-primary-50 border-2 border-primary-100 flex items-center justify-center mb-4">
-                @svg('heroicon-o-clipboard-document-list', 'w-10 h-10 text-primary-600')
+            <div class="w-12 h-12 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center mb-3">
+                @svg('heroicon-o-clipboard-document-list', 'w-6 h-6 text-gray-300')
             </div>
-            <p class="text-xl font-black text-gray-800 mb-1">No orders here</p>
-            <p class="text-sm font-bold text-gray-500 mb-5">Nothing with this status yet.</p>
+            <p class="text-sm font-semibold text-gray-600 mb-1">No orders here</p>
+            <p class="text-xs text-gray-400 mb-5">Nothing with this status yet.</p>
         </div>
         @endif
 
@@ -526,14 +526,14 @@ new class extends Component
             {{-- Header — fixed, never scrolls --}}
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
                 <div>
-                    <h2 class="text-xl font-black text-gray-950">Select Payment Method</h2>
-                    <p class="text-sm font-bold text-gray-500 mt-0.5">
-                        Total: <span class="font-black text-gray-800">৳{{ $this->amount }}</span>
+                    <h2 class="text-sm font-bold text-gray-900">Select Payment Method</h2>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                        Total: <span class="font-semibold text-gray-700">৳{{ $this->amount }}</span>
                     </p>
                 </div>
-                <button wire:click="closeModal" type="button" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500
+                <button wire:click="closeModal" type="button" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400
                            hover:text-gray-600 hover:bg-gray-100 transition-colors">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
@@ -548,19 +548,19 @@ new class extends Component
                         ? 'border-pink-500 bg-pink-50'
                         : 'border-gray-100 bg-gray-50 hover:border-gray-200 hover:bg-white' }}">
 
-                    <div class="w-16 h-16 rounded-xl bg-[#E2136E] flex items-center justify-center shrink-0">
-                        <span class="text-white font-black text-base tracking-tight">bKash</span>
+                    <div class="w-12 h-12 rounded-xl bg-[#E2136E] flex items-center justify-center shrink-0">
+                        <span class="text-white font-black text-xs tracking-tight">bKash</span>
                     </div>
 
                     <div class="text-left flex-1 min-w-0">
-                        <p class="text-lg font-black text-gray-900">bKash</p>
-                        <p class="text-sm font-semibold text-gray-500">Mobile banking · instant</p>
+                        <p class="text-sm font-semibold text-gray-800">bKash</p>
+                        <p class="text-xs text-gray-400">Mobile banking · instant</p>
                     </div>
 
-                    <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
                         {{ $selectedMethod === 'bkash' ? 'border-pink-500 bg-pink-500' : 'border-gray-300' }}">
                         @if ($selectedMethod === 'bkash')
-                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                             stroke-width="3">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
@@ -574,21 +574,21 @@ new class extends Component
                         ? 'border-primary-500 bg-primary-50'
                         : 'border-gray-100 bg-gray-50 hover:border-gray-200 hover:bg-white' }}">
 
-                    <div class="w-16 h-16 rounded-xl bg-[#0B5EA8] flex items-center justify-center shrink-0">
-                        <span class="text-white font-black text-xs leading-tight text-center">SSL<br>Commerz</span>
+                    <div class="w-12 h-12 rounded-xl bg-[#0B5EA8] flex items-center justify-center shrink-0">
+                        <span class="text-white font-black text-[9px] leading-tight text-center">SSL<br>Commerz</span>
                     </div>
 
                     <div class="text-left flex-1 min-w-0">
-                        <p class="text-lg font-black text-gray-900">SSLCommerz</p>
-                        <p class="text-sm font-semibold text-gray-500 mb-1">Card · online bank · mobile bank</p>
-                        <img src="{{ asset('images/sslcommerz-we-accept.png') }}" class="h-12 object-contain">
+                        <p class="text-sm font-semibold text-gray-800">SSLCommerz</p>
+                        <p class="text-xs text-gray-400 mb-1">Card · online bank · mobile bank</p>
+                        <img src="{{ asset('images/sslcommerz-we-accept.png') }}" class="h-10 object-contain">
                     </div>
 
                     <div
-                        class="w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+                        class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
                         {{ $selectedMethod === 'sslcommerz' ? 'border-primary-500 bg-primary-500' : 'border-gray-300' }}">
                         @if ($selectedMethod === 'sslcommerz')
-                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                             stroke-width="3">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
@@ -602,23 +602,23 @@ new class extends Component
                         ? 'border-emerald-500 bg-emerald-50'
                         : 'border-gray-100 bg-gray-50 hover:border-gray-200 hover:bg-white' }}">
 
-                    <div class="w-16 h-16 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0">
-                        <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                            stroke-width="2.5">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11M8 10v11M12 10v11M16 10v11" />
                         </svg>
                     </div>
 
                     <div class="text-left flex-1 min-w-0">
-                        <p class="text-lg font-black text-gray-900">Bank Transfer</p>
-                        <p class="text-sm font-semibold text-gray-500">Direct deposit · manual verification</p>
+                        <p class="text-sm font-semibold text-gray-800">Bank Transfer</p>
+                        <p class="text-xs text-gray-400">Direct deposit · manual verification</p>
                     </div>
 
-                    <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
                         {{ $selectedMethod === 'bank' ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300' }}">
                         @if ($selectedMethod === 'bank')
-                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                             stroke-width="3">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
