@@ -41,13 +41,13 @@ new class extends Component
 
     <div class="bg-white border-2 shadow-xl shadow-gray-200/40 rounded-2xl p-2 md:p-3 animate-border-pulse">
         <div class="flex flex-wrap md:flex-nowrap items-center gap-3">
-            <div class="flex-1 flex items-center gap-3 px-4">
-                <span class="p-2 bg-gray-100 rounded-full">
-                    <x-heroicon-o-link class="h-5 w-5 text-primary-500" />
+            <div class="flex-1 flex items-center gap-2 px-4">
+                <span class="p-3 hidden md:block bg-[#F3F3F3] rounded-full">
+                    <x-heroicon-o-link class="h-6 w-6 text-primary-500" />
                 </span>
                 <input type="url" wire:model='productURL'
                     placeholder="Paste a product link from Amazon, Alibaba, AliExpress, eBay..."
-                    class="w-full text-sm text-gray-800 placeholder-gray-400 bg-transparent outline-none border-none py-2 focus:ring-0" />
+                    class="w-full text-sm text-gray-800 bg-[#F3F3F3] placeholder-[#727171] rounded-xl px-2 py-4 outline-none border-none focus:ring-0" />
             </div>
 
             <button wire:click="orderRequest"
